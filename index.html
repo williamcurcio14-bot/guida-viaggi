@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guida ai paesi del mondo: voli, regioni, sicurezza e consigli di viaggio</title>
+<meta name="description" content="Guida di viaggio con 194 paesi: valuta, visto, sicurezza aggiornata, prezzo medio del volo da Roma, regioni da vedere e diario di viaggio personale. Scopri quanto costa un volo per il Giappone, cosa vedere nelle regioni del Marocco e molto altro.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Libre+Franklin:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.25.6/babel.min.js"></script>
+<style>
+  :root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #EDE6D6; }
+  .font-serif { font-family: 'Fraunces', serif; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<noscript>
+  <div style="max-width:640px;margin:60px auto;padding:24px;font-family:sans-serif;color:#1B2A38;">
+    <h1>Guida ai paesi del mondo</h1>
+    <p>Questa guida di viaggio con 194 paesi, regioni, sicurezza aggiornata e prezzi medi dei voli richiede JavaScript per funzionare. Attiva JavaScript nel tuo browser per continuare.</p>
+  </div>
+</noscript>
+<script type="text/babel" data-presets="react" data-plugins="transform-react-jsx">
+const { useState, useMemo, useEffect } = React;
+
+// ---------------------------------------------------------------------------
+// STORAGE: salvataggio locale per-dispositivo (paesi visitati, blog)
+// ---------------------------------------------------------------------------
+const STORAGE_PREFIX = "travel-app:";
+const storage = {
+  async get(key) {
+    try {
+      const v = localStorage.getItem(STORAGE_PREFIX + key);
+      return v !== null ? { value: v } : null;
+    } catch (e) {
+      return null;
+    }
+  },
+  async set(key, value) {
+    try {
+      localStorage.setItem(STORAGE_PREFIX + key, value);
+      return { key, value };
+    } catch (e) {
+      return null;
+    }
+  },
+};
+
+// ---------------------------------------------------------------------------
+// ICONE: sostituiscono lucide-react con semplici emoji/simboli inline
+// (necessario perché la libreria lucide-react non è caricabile qui)
+// ---------------------------------------------------------------------------
+function EmojiIcon({ glyph, size = 16, style = {} }) {
+  return <span style={{ fontSize: size, lineHeight: 1, display: "inline-block", ...style }}>{glyph}</span>;
+}
+const Search = (p) => <EmojiIcon glyph="🔍" {...p} />;
+const X = (p) => <EmojiIcon glyph="✕" {...p} />;
+const Plane = (p) => <EmojiIcon glyph="✈️" {...p} />;
+const MapPin = (p) => <EmojiIcon glyph="📍" {...p} />;
+const Compass = (p) => <EmojiIcon glyph="🧭" {...p} />;
+const ShieldCheck = (p) => <EmojiIcon glyph="🛡️" {...p} />;
+const Coins = (p) => <EmojiIcon glyph="💰" {...p} />;
+const Languages = (p) => <EmojiIcon glyph="🗣️" {...p} />;
+const CalendarRange = (p) => <EmojiIcon glyph="📅" {...p} />;
+const Plug = (p) => <EmojiIcon glyph="🔌" {...p} />;
+const HandCoins = (p) => <EmojiIcon glyph="💵" {...p} />;
+const Phone = (p) => <EmojiIcon glyph="☎️" {...p} />;
+const Globe2 = (p) => <EmojiIcon glyph="🌍" {...p} />;
+const Info = (p) => <EmojiIcon glyph="ℹ️" {...p} />;
+const Building2 = (p) => <EmojiIcon glyph="🏙️" {...p} />;
+const Waves = (p) => <EmojiIcon glyph="🌊" {...p} />;
+const Mountain = (p) => <EmojiIcon glyph="⛰️" {...p} />;
+const Palmtree = (p) => <EmojiIcon glyph="🌴" {...p} />;
+const Sun = (p) => <EmojiIcon glyph="☀️" {...p} />;
+const Trees = (p) => <EmojiIcon glyph="🌳" {...p} />;
+const Ticket = (p) => <EmojiIcon glyph="🎫" {...p} />;
+const BookOpen = (p) => <EmojiIcon glyph="📖" {...p} />;
+const ArrowLeft = (p) => <EmojiIcon glyph="←" {...p} />;
+const CheckCircle2 = (p) => <EmojiIcon glyph="✅" {...p} />;
+const Circle = (p) => <EmojiIcon glyph="⚪" {...p} />;
+const UtensilsCrossed = (p) => <EmojiIcon glyph="🍽️" {...p} />;
+const Landmark = (p) => <EmojiIcon glyph="🏛️" {...p} />;
+const Sparkles = (p) => <EmojiIcon glyph="✨" {...p} />;
+const MapPinned = (p) => <EmojiIcon glyph="🗺️" {...p} />;
+const PenLine = (p) => <EmojiIcon glyph="✏️" {...p} />;
+const Trash2 = (p) => <EmojiIcon glyph="🗑️" {...p} />;
+const NotebookPen = (p) => <EmojiIcon glyph="📓" {...p} />;
+const Star = ({ size = 16, className = "" }) => {
+  const filled = className.includes("fill-");
+  return <EmojiIcon glyph={filled ? "★" : "☆"} size={size} />;
+};
+
+
+// ---------------------------------------------------------------------------
+// DATI
+// ---------------------------------------------------------------------------
+
+const CONTINENTS = [
+  { id: "tutti", label: "Tutti" },
+  { id: "europa", label: "Europa" },
+  { id: "asia", label: "Asia" },
+  { id: "africa", label: "Africa" },
+  { id: "americhe", label: "Americhe" },
+  { id: "oceania", label: "Oceania" },
+];
+
+const COUNTRIES = [
+  { name: "Italia", enName: "Italy", flag: "🇮🇹", continent: "europa", capital: "Roma", currency: "Euro (EUR)", language: "Italiano", bestTime: "Apr–Giu, Set–Ott", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura, attenzione ai borseggi nelle città", plug: "Tipo C/F, 230V", tipping: "Non obbligatoria, apprezzata al 10%", emergency: "112", extra: "Il servizio è quasi sempre incluso nel conto (coperto)." , food: "Pasta alla carbonara" , riskLevel: "sicuro" },
+  { name: "Francia", enName: "France", flag: "🇫🇷", continent: "europa", capital: "Parigi", currency: "Euro (EUR)", language: "Francese", bestTime: "Mag–Set", visa: "Nessun visto per UE/Schengen", safety: "Sicura, occhio ai borseggi a Parigi", plug: "Tipo C/E, 230V", tipping: "Servizio spesso incluso, mancia extra gradita", emergency: "112", extra: "Molti negozi chiudono la domenica, soprattutto fuori Parigi." , food: "Baguette e formaggi francesi" , riskLevel: "sicuro" },
+  { name: "Spagna", enName: "Spain", flag: "🇪🇸", continent: "europa", capital: "Madrid", currency: "Euro (EUR)", language: "Spagnolo", bestTime: "Apr–Giu, Set–Ott", visa: "Nessun visto per UE/Schengen", safety: "Sicura, attenzione a Barcellona e Madrid", plug: "Tipo C/F, 230V", tipping: "5–10% nei ristoranti", emergency: "112", extra: "La cena si fa tardi: molti ristoranti aprono solo dopo le 20:30." , food: "Paella" , riskLevel: "sicuro" },
+  { name: "Portogallo", enName: "Portugal", flag: "🇵🇹", continent: "europa", capital: "Lisbona", currency: "Euro (EUR)", language: "Portoghese", bestTime: "Mar–Mag, Set–Ott", visa: "Nessun visto per UE/Schengen", safety: "Molto sicuro", plug: "Tipo C/F, 230V", tipping: "5–10% se il servizio piace", emergency: "112", extra: "I petiscos (piccole porzioni) sono il modo migliore per assaggiare più piatti." , food: "Bacalhau e pastel de nata" , riskLevel: "sicuro" },
+  { name: "Germania", enName: "Germany", flag: "🇩🇪", continent: "europa", capital: "Berlino", currency: "Euro (EUR)", language: "Tedesco", bestTime: "Mag–Set", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo C/F, 230V", tipping: "5–10%, si arrotonda il conto", emergency: "112", extra: "Il contante resta molto usato: porta sempre banconote con te." , food: "Würstel con crauti" , riskLevel: "sicuro" },
+  { name: "Regno Unito", enName: "United Kingdom", flag: "🇬🇧", continent: "europa", capital: "Londra", currency: "Sterlina (GBP)", language: "Inglese", bestTime: "Mag–Set", visa: "Nessun visto fino a 6 mesi per turismo (UE)", safety: "Sicuro, attenzione ai borseggi in metro", plug: "Tipo G, 230V", tipping: "10–12,5% se non incluso", emergency: "999 / 112", extra: "Si guida a sinistra: fai attenzione attraversando la strada." , food: "Fish and chips" , riskLevel: "sicuro" },
+  { name: "Grecia", enName: "Greece", flag: "🇬🇷", continent: "europa", capital: "Atene", currency: "Euro (EUR)", language: "Greco", bestTime: "Mag–Giu, Set", visa: "Nessun visto per UE/Schengen", safety: "Sicura", plug: "Tipo C/F, 230V", tipping: "5–10%", emergency: "112", extra: "Molte isole si raggiungono solo con traghetti stagionali." , food: "Souvlaki e tzatziki" , riskLevel: "sicuro" },
+  { name: "Croazia", enName: "Croatia", flag: "🇭🇷", continent: "europa", capital: "Zagabria", currency: "Euro (EUR)", language: "Croato", bestTime: "Mag–Set", visa: "Nessun visto per UE/Schengen", safety: "Sicura", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "L'Euro ha sostituito la Kuna come valuta dal 2023." , food: "Frutti di mare alla griglia" , riskLevel: "sicuro" },
+  { name: "Islanda", enName: "Iceland", flag: "🇮🇸", continent: "europa", capital: "Reykjavík", currency: "Corona islandese (ISK)", language: "Islandese", bestTime: "Giu–Ago (estate), Feb–Mar (aurore)", visa: "Nessun visto per UE/Schengen", safety: "Tra le nazioni più sicure al mondo", plug: "Tipo C/F, 230V", tipping: "Non prevista, spesso già inclusa", emergency: "112", extra: "L'acqua del rubinetto è tra le più pure al mondo: niente bottiglie." , food: "Zuppa di pesce e agnello islandese" , riskLevel: "sicuro" },
+  { name: "Norvegia", enName: "Norway", flag: "🇳🇴", continent: "europa", capital: "Oslo", currency: "Corona norvegese (NOK)", language: "Norvegese", bestTime: "Giu–Ago, Ott–Mar (aurore)", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo C/F, 230V", tipping: "Non obbligatoria", emergency: "112", extra: "I prezzi al ristorante sono tra i più alti d'Europa: valuta i supermercati." , food: "Salmone e pesce affumicato" , riskLevel: "sicuro" },
+  { name: "Svizzera", enName: "Switzerland", flag: "🇨🇭", continent: "europa", capital: "Berna", currency: "Franco svizzero (CHF)", language: "Tedesco, francese, italiano", bestTime: "Giu–Set, Dic–Mar (neve)", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo J, 230V", tipping: "Non necessaria, servizio incluso", emergency: "112", extra: "Nei piccoli negozi di montagna le carte non sempre sono accettate." , food: "Fondue di formaggio" , riskLevel: "sicuro" },
+  { name: "Paesi Bassi", enName: "Netherlands", flag: "🇳🇱", continent: "europa", capital: "Amsterdam", currency: "Euro (EUR)", language: "Olandese", bestTime: "Apr–Mag, Set", visa: "Nessun visto per UE/Schengen", safety: "Molto sicuri", plug: "Tipo C/F, 230V", tipping: "5–10%", emergency: "112", extra: "La bicicletta ha la precedenza quasi ovunque, anche sui pedoni." , food: "Aringhe e formaggio Gouda" , riskLevel: "sicuro" },
+  { name: "Irlanda", enName: "Ireland", flag: "🇮🇪", continent: "europa", capital: "Dublino", currency: "Euro (EUR)", language: "Inglese, irlandese", bestTime: "Mag–Set", visa: "Nessun visto per UE (area comune di viaggio)", safety: "Molto sicura", plug: "Tipo G, 230V", tipping: "10% se non incluso", emergency: "112", extra: "Il tempo cambia rapidamente: porta sempre una giacca impermeabile." , food: "Irish stew" , riskLevel: "sicuro" },
+  { name: "Austria", enName: "Austria", flag: "🇦🇹", continent: "europa", capital: "Vienna", currency: "Euro (EUR)", language: "Tedesco", bestTime: "Mag–Set, Dic–Mar (neve)", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo C/F, 230V", tipping: "5–10%", emergency: "112", extra: "La domenica quasi tutto è chiuso, anche i supermercati." , food: "Wiener Schnitzel" , riskLevel: "sicuro" },
+  { name: "Repubblica Ceca", enName: "Czech Republic", flag: "🇨🇿", continent: "europa", capital: "Praga", currency: "Corona ceca (CZK)", language: "Ceco", bestTime: "Apr–Mag, Set–Ott", visa: "Nessun visto per UE/Schengen", safety: "Sicura", plug: "Tipo C/E, 230V", tipping: "10%", emergency: "112", extra: "La birra costa spesso meno dell'acqua al ristorante." , food: "Gulasch con knedlíky" , riskLevel: "sicuro" },
+
+  { name: "Giappone", enName: "Japan", flag: "🇯🇵", continent: "asia", capital: "Tokyo", currency: "Yen (JPY)", language: "Giapponese", bestTime: "Mar–Mag (fiori), Ott–Nov (autunno)", visa: "Nessun visto turistico fino a 90 giorni (IT)", safety: "Tra le nazioni più sicure al mondo", plug: "Tipo A/B, 100V", tipping: "Non prevista, può essere percepita come scortese", emergency: "110 (polizia) / 119 (ambulanza)", extra: "I contanti restano fondamentali: molti piccoli locali non accettano carte." , food: "Sushi e ramen" , riskLevel: "sicuro" },
+  { name: "Thailandia", enName: "Thailand", flag: "🇹🇭", continent: "asia", capital: "Bangkok", currency: "Baht (THB)", language: "Thai", bestTime: "Nov–Feb (stagione secca)", visa: "Visto turistico gratuito fino a 60 giorni", safety: "Generalmente sicura, attenzione a truffe turistiche", plug: "Tipo A/C/O, 220V", tipping: "Non obbligatoria, gradita", emergency: "191 (polizia) / 1669 (ambulanza)", extra: "Toccare la testa di qualcuno o puntare i piedi è considerato scortese." , food: "Pad thai" , riskLevel: "sicuro" },
+  { name: "Vietnam", enName: "Vietnam", flag: "🇻🇳", continent: "asia", capital: "Hanoi", currency: "Dong (VND)", language: "Vietnamita", bestTime: "Nov–Apr", visa: "e-visa richiesto, fino a 90 giorni", safety: "Sicuro, attenzione al traffico", plug: "Tipo A/C, 220V", tipping: "Non tradizionale ma apprezzata", emergency: "113 (polizia) / 115 (ambulanza)", extra: "Attraversare la strada richiede di camminare con calma, senza correre." , food: "Pho (zuppa di noodles)" , riskLevel: "sicuro" },
+  { name: "Indonesia", enName: "Indonesia", flag: "🇮🇩", continent: "asia", capital: "Giacarta", currency: "Rupia (IDR)", language: "Indonesiano", bestTime: "Mag–Set (stagione secca)", visa: "Visa on arrival fino a 30 giorni", safety: "Sicura nelle aree turistiche, occhio alle correnti in mare", plug: "Tipo C/F, 230V", tipping: "Non obbligatoria, 5–10% gradita", emergency: "112", extra: "Con oltre 17.000 isole, molti trasferimenti richiedono un volo interno." , food: "Nasi goreng" , riskLevel: "sicuro" },
+  { name: "India", enName: "India", flag: "🇮🇳", continent: "asia", capital: "New Delhi", currency: "Rupia indiana (INR)", language: "Hindi, inglese", bestTime: "Ott–Mar (clima fresco)", visa: "e-visa obbligatorio", safety: "Attenzione a truffe e traffico, cautela extra per donne sole", plug: "Tipo C/D/M, 230V", tipping: "10%, spesso apprezzata anche piccola", emergency: "112", extra: "I mezzi pubblici possono essere molto affollati: pianifica con margine di tempo." , food: "Curry e naan" , riskLevel: "cautela" },
+  { name: "Cina", enName: "China", flag: "🇨🇳", continent: "asia", capital: "Pechino", currency: "Yuan (CNY)", language: "Mandarino", bestTime: "Mar–Mag, Set–Nov", visa: "Visto turistico richiesto in anticipo", safety: "Sicura, forte controllo digitale e sorveglianza", plug: "Tipo A/C/I, 220V", tipping: "Non prevista, spesso rifiutata", emergency: "110 (polizia) / 120 (ambulanza)", extra: "Molte app occidentali (Google, WhatsApp) non funzionano senza VPN." , food: "Anatra alla pechinese" , riskLevel: "cautela" },
+  { name: "Corea del Sud", enName: "South Korea", flag: "🇰🇷", continent: "asia", capital: "Seoul", currency: "Won (KRW)", language: "Coreano", bestTime: "Mar–Mag, Set–Nov", visa: "Nessun visto turistico fino a 90 giorni (IT)", safety: "Molto sicura", plug: "Tipo C/F, 220V", tipping: "Non prevista", emergency: "112 (polizia) / 119 (ambulanza)", extra: "Il riscaldamento a pavimento (ondol) è tipico anche negli alloggi turistici." , food: "Kimchi e bibimbap" , riskLevel: "sicuro" },
+  { name: "Emirati Arabi Uniti", enName: "United Arab Emirates", flag: "🇦🇪", continent: "asia", capital: "Abu Dhabi", currency: "Dirham (AED)", language: "Arabo, inglese", bestTime: "Nov–Mar (clima mite)", visa: "Nessun visto turistico fino a 90 giorni (IT)", safety: "Generalmente sicuri, ma la regione del Golfo è soggetta a tensioni legate al conflitto in Medio Oriente: verifica sempre gli avvisi aggiornati prima di partire", plug: "Tipo C/G, 230V", tipping: "10% consuetudinaria", emergency: "999 (polizia) / 998 (ambulanza)", extra: "Durante il Ramadan valgono regole particolari su cibo e bevande in pubblico." , food: "Shawarma e riso speziato" , riskLevel: "cautela" },
+  { name: "Nepal", enName: "Nepal", flag: "🇳🇵", continent: "asia", capital: "Kathmandu", currency: "Rupia nepalese (NPR)", language: "Nepalese", bestTime: "Mar–Mag, Set–Nov (trekking)", visa: "Visa on arrival", safety: "Sicuro, attenzione in trekking d'alta quota", plug: "Tipo C/D/M, 230V", tipping: "10%, importante per guide e portatori", emergency: "100 (polizia)", extra: "Sopra i 2.500 m l'acclimatamento graduale previene il mal di montagna." , food: "Momo (ravioli al vapore)" , riskLevel: "sicuro" },
+  { name: "Sri Lanka", enName: "Sri Lanka", flag: "🇱🇰", continent: "asia", capital: "Colombo", currency: "Rupia dello Sri Lanka (LKR)", language: "Singalese, tamil", bestTime: "Dic–Mar (costa ovest/sud)", visa: "ETA obbligatorio", safety: "Sicuro per turisti", plug: "Tipo D/G, 230V", tipping: "10%, spesso già incluso", emergency: "119", extra: "Le piantagioni di tè sulle colline centrali si visitano tutto l'anno." , food: "Curry di riso e hoppers" , riskLevel: "sicuro" },
+  { name: "Filippine", enName: "Philippines", flag: "🇵🇭", continent: "asia", capital: "Manila", currency: "Peso filippino (PHP)", language: "Filippino, inglese", bestTime: "Dic–Mag (stagione secca)", visa: "Nessun visto fino a 30 giorni", safety: "Sicuro nelle zone turistiche, attenzione a tifoni stagionali", plug: "Tipo A/B/C, 220V", tipping: "10% se non incluso", emergency: "911", extra: "Il paese conta oltre 7.000 isole: i trasferimenti richiedono spesso barca o volo." , food: "Adobo (carne stufata)" , riskLevel: "cautela" },
+  { name: "Malesia", enName: "Malaysia", flag: "🇲🇾", continent: "asia", capital: "Kuala Lumpur", currency: "Ringgit (MYR)", language: "Malese, inglese", bestTime: "Mar–Ott (costa est), Nov–Feb altrove", visa: "Nessun visto fino a 90 giorni", safety: "Sicura", plug: "Tipo G, 230V", tipping: "Non prevista, servizio spesso incluso", emergency: "999", extra: "Il cibo di strada halal è la norma nella maggior parte delle città." , food: "Nasi lemak" , riskLevel: "sicuro" },
+  { name: "Singapore", enName: "Singapore", flag: "🇸🇬", continent: "asia", capital: "Singapore", currency: "Dollaro di Singapore (SGD)", language: "Inglese, malese, mandarino, tamil", bestTime: "Tutto l'anno, clima equatoriale stabile", visa: "Nessun visto fino a 90 giorni", safety: "Tra le città più sicure al mondo", plug: "Tipo G, 230V", tipping: "Non prevista, spesso proibita", emergency: "999 (polizia) / 995 (ambulanza)", extra: "Multe severe per piccoli gesti, come gettare rifiuti o mangiare in metro." , food: "Chili crab" , riskLevel: "sicuro" },
+  { name: "Georgia", enName: "Georgia (country)", flag: "🇬🇪", continent: "asia", capital: "Tbilisi", currency: "Lari (GEL)", language: "Georgiano", bestTime: "Mag–Giu, Set–Ott", visa: "Nessun visto fino a 1 anno", safety: "Sicura nella maggior parte del territorio; le regioni separatiste di Abkhazia e Ossezia del Sud sono sconsigliate", plug: "Tipo C/F, 220V", tipping: "10%", emergency: "112", extra: "La cucina locale è patrimonio Unesco: da provare il khachapuri." , food: "Khinkali (ravioli ripieni)" , riskLevel: "cautela" },
+  { name: "Turchia", enName: "Turkey", flag: "🇹🇷", continent: "asia", capital: "Ankara", currency: "Lira turca (TRY)", language: "Turco", bestTime: "Apr–Mag, Set–Ott", visa: "e-visa o esente per brevi soggiorni (IT)", safety: "Generalmente sicura nelle zone turistiche", plug: "Tipo C/F, 230V", tipping: "5–10%", emergency: "112", extra: "Il tè (çay) si offre spesso come gesto di ospitalità, anche nei negozi." , food: "Kebab e baklava" , riskLevel: "cautela" },
+
+  { name: "Marocco", enName: "Morocco", flag: "🇲🇦", continent: "africa", capital: "Rabat", currency: "Dirham marocchino (MAD)", language: "Arabo, francese", bestTime: "Mar–Mag, Set–Nov", visa: "Nessun visto fino a 90 giorni", safety: "Sicuro, attenzione a insistenza dei venditori", plug: "Tipo C/E, 220V", tipping: "10%, molto diffusa", emergency: "19 (polizia) / 15 (ambulanza)", extra: "Il venerdì è il giorno di preghiera principale: alcuni negozi chiudono a mezzogiorno." , food: "Tajine e couscous" , riskLevel: "sicuro" },
+  { name: "Egitto", enName: "Egypt", flag: "🇪🇬", continent: "africa", capital: "Il Cairo", currency: "Lira egiziana (EGP)", language: "Arabo", bestTime: "Ott–Apr (clima più fresco)", visa: "Visto turistico o e-visa richiesto", safety: "Sicuro nelle aree turistiche, tour organizzati consigliati", plug: "Tipo C/F, 220V", tipping: "Baksheesh diffuso e quasi obbligatorio", emergency: "122 (polizia) / 123 (ambulanza)", extra: "Un abbigliamento coperto è consigliato soprattutto fuori dalle zone turistiche." , food: "Koshari (riso, lenticchie e pasta)" , riskLevel: "cautela" },
+  { name: "Sudafrica", enName: "South Africa", flag: "🇿🇦", continent: "africa", capital: "Pretoria", currency: "Rand (ZAR)", language: "Inglese, afrikaans, zulu e altre", bestTime: "Mag–Set (safari, stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Cautela in alcune città, sicuro nei safari e resort", plug: "Tipo M/N, 230V", tipping: "10–15%", emergency: "112 (da cellulare) / 10111 (polizia)", extra: "Il paese ha 11 lingue ufficiali: inglese e afrikaans bastano per viaggiare." , food: "Bobotie (sformato speziato)" , riskLevel: "cautela" },
+  { name: "Kenya", enName: "Kenya", flag: "🇰🇪", continent: "africa", capital: "Nairobi", currency: "Scellino keniota (KES)", language: "Swahili, inglese", bestTime: "Lug–Ott (grande migrazione)", visa: "e-visa obbligatorio", safety: "Sicuro nei circuiti safari organizzati", plug: "Tipo G, 240V", tipping: "10%, importante per guide safari", emergency: "999 / 112", extra: "Scegli sempre guide safari locali autorizzate, evitando tour non certificati." , food: "Nyama choma (carne alla griglia)" , riskLevel: "cautela" },
+  { name: "Tanzania", enName: "Tanzania", flag: "🇹🇿", continent: "africa", capital: "Dodoma", currency: "Scellino tanzaniano (TZS)", language: "Swahili, inglese", bestTime: "Giu–Ott (safari, stagione secca)", visa: "Visto richiesto, ottenibile online o all'arrivo", safety: "Sicura nei tour organizzati", plug: "Tipo D/G, 230V", tipping: "Attesa per guide e staff safari", emergency: "112", extra: "Il Kilimanjaro si scala in più giorni, con acclimatamento graduale." , food: "Ugali con carne o pesce" , riskLevel: "sicuro" },
+  { name: "Namibia", enName: "Namibia", flag: "🇳🇦", continent: "africa", capital: "Windhoek", currency: "Dollaro namibiano (NAD)", language: "Inglese, afrikaans", bestTime: "Mag–Ott (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Sicura, distanze lunghe da pianificare", plug: "Tipo D/M, 220V", tipping: "10%", emergency: "10111", extra: "Le distanze tra le attrazioni sono enormi: serve un'auto a noleggio." , food: "Carne di selvaggina alla griglia" , riskLevel: "sicuro" },
+  { name: "Senegal", enName: "Senegal", flag: "🇸🇳", continent: "africa", capital: "Dakar", currency: "Franco CFA (XOF)", language: "Francese, wolof", bestTime: "Nov–Mag (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Generalmente sicuro", plug: "Tipo C/E/K, 230V", tipping: "Gradita, non obbligatoria", emergency: "17", extra: "Il thé alla menta si versa in tre giri, ognuno con un sapore diverso." , food: "Thieboudienne (riso e pesce)" , riskLevel: "sicuro" },
+  { name: "Tunisia", enName: "Tunisia", flag: "🇹🇳", continent: "africa", capital: "Tunisi", currency: "Dinaro tunisino (TND)", language: "Arabo, francese", bestTime: "Mar–Mag, Set–Nov", visa: "Nessun visto fino a 90 giorni", safety: "Sicura nelle zone turistiche costiere", plug: "Tipo C/E, 230V", tipping: "10%", emergency: "197 (polizia) / 190 (ambulanza)", extra: "Il souk è il luogo giusto per contrattare il prezzo, quasi sempre previsto." , food: "Couscous e brik" , riskLevel: "cautela" },
+
+  { name: "Stati Uniti", enName: "United States", flag: "🇺🇸", continent: "americhe", capital: "Washington D.C.", currency: "Dollaro USA (USD)", language: "Inglese", bestTime: "Varia molto per stato, in genere Apr–Giu, Set–Ott", visa: "ESTA obbligatorio (Visa Waiver)", safety: "Sicuro, variabile a seconda delle città", plug: "Tipo A/B, 120V", tipping: "15–20% quasi obbligatoria al ristorante", emergency: "911", extra: "Le distanze tra città sono enormi: pianifica bene i trasferimenti interni." , food: "Hamburger e barbecue" , riskLevel: "cautela" },
+  { name: "Canada", enName: "Canada", flag: "🇨🇦", continent: "americhe", capital: "Ottawa", currency: "Dollaro canadese (CAD)", language: "Inglese, francese", bestTime: "Mag–Set", visa: "eTA obbligatorio", safety: "Molto sicuro", plug: "Tipo A/B, 120V", tipping: "15–18%", emergency: "911", extra: "Il clima varia moltissimo tra costa e regioni interne: controlla la zona specifica." , food: "Poutine" , riskLevel: "sicuro" },
+  { name: "Messico", enName: "Mexico", flag: "🇲🇽", continent: "americhe", capital: "Città del Messico", currency: "Peso messicano (MXN)", language: "Spagnolo", bestTime: "Nov–Apr (stagione secca)", visa: "Nessun visto fino a 180 giorni", safety: "Attenzione fuori dalle zone turistiche, informarsi per area", plug: "Tipo A/B, 127V", tipping: "10–15%", emergency: "911", extra: "Il piccante è quasi sempre servito a parte: puoi chiederlo più leggero." , food: "Tacos" , riskLevel: "cautela" },
+  { name: "Brasile", enName: "Brazil", flag: "🇧🇷", continent: "americhe", capital: "Brasília", currency: "Real (BRL)", language: "Portoghese", bestTime: "Mag–Set (stagione secca, esclusa Amazzonia)", visa: "Nessun visto fino a 90 giorni (IT)", safety: "Cautela in grandi città, sicuro nelle zone turistiche", plug: "Tipo C/N, 127/220V", tipping: "10%, spesso incluso nel conto", emergency: "190 (polizia) / 192 (ambulanza)", extra: "Durante il Carnevale i prezzi salgono molto: prenota con largo anticipo." , food: "Feijoada" , riskLevel: "cautela" },
+  { name: "Argentina", enName: "Argentina", flag: "🇦🇷", continent: "americhe", capital: "Buenos Aires", currency: "Peso argentino (ARS)", language: "Spagnolo", bestTime: "Nov–Mar (estate australe), Giu–Ago (sci)", visa: "Nessun visto fino a 90 giorni", safety: "Sicura, attenzione ai borseggi in città", plug: "Tipo C/I, 220V", tipping: "10%", emergency: "911", extra: "L'inflazione rende i prezzi molto variabili: controlla i tassi di cambio aggiornati." , food: "Asado (grigliata di carne)" , riskLevel: "sicuro" },
+  { name: "Perù", enName: "Peru", flag: "🇵🇪", continent: "americhe", capital: "Lima", currency: "Sol (PEN)", language: "Spagnolo, quechua", bestTime: "Mag–Set (stagione secca, Ande)", visa: "Nessun visto fino a 90 giorni", safety: "Sicuro nei circuiti turistici, cautela nelle grandi città", plug: "Tipo A/C, 220V", tipping: "10%", emergency: "105 (polizia) / 106 (ambulanza)", extra: "Machu Picchu richiede prenotazione con settimane di anticipo, soprattutto in alta stagione." , food: "Ceviche" , riskLevel: "cautela" },
+  { name: "Cile", enName: "Chile", flag: "🇨🇱", continent: "americhe", capital: "Santiago", currency: "Peso cileno (CLP)", language: "Spagnolo", bestTime: "Dic–Mar (estate australe)", visa: "Nessun visto fino a 90 giorni", safety: "Uno dei paesi più sicuri del Sud America", plug: "Tipo C/L, 220V", tipping: "10%", emergency: "133 (polizia) / 131 (ambulanza)", extra: "Il paese si estende per oltre 4.000 km: i climi cambiano radicalmente da nord a sud." , food: "Empanadas" , riskLevel: "sicuro" },
+  { name: "Colombia", enName: "Colombia", flag: "🇨🇴", continent: "americhe", capital: "Bogotá", currency: "Peso colombiano (COP)", language: "Spagnolo", bestTime: "Dic–Mar, Jul–Ago (stagioni secche)", visa: "Nessun visto fino a 90 giorni", safety: "Molto migliorata, informarsi per area specifica", plug: "Tipo A/B, 110V", tipping: "10%, a volte già incluso", emergency: "123", extra: "Il miglior caffè spesso si esporta: chiedi le varietà locali nei caffè specializzati." , food: "Bandeja paisa" , riskLevel: "cautela" },
+  { name: "Costa Rica", enName: "Costa Rica", flag: "🇨🇷", continent: "americhe", capital: "San José", currency: "Colón (CRC)", language: "Spagnolo", bestTime: "Dic–Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Sicura, tra le più stabili dell'America centrale", plug: "Tipo A/B, 120V", tipping: "10% spesso già incluso", emergency: "911", extra: "\"Pura vida\" è il saluto informale usato praticamente ovunque." , food: "Gallo pinto" , riskLevel: "sicuro" },
+  { name: "Cuba", enName: "Cuba", flag: "🇨🇺", continent: "americhe", capital: "L'Avana", currency: "Peso cubano (CUP)", language: "Spagnolo", bestTime: "Nov–Apr (stagione secca)", visa: "Carta turistica obbligatoria", safety: "Sicura, contante indispensabile (poche carte accettate)", plug: "Tipo A/B/C, 110/220V", tipping: "10%, molto apprezzata data l'economia locale", emergency: "106 (polizia) / 104 (ambulanza)", extra: "Internet è limitato e spesso a pagamento tramite schede prepagate." , food: "Ropa vieja" , riskLevel: "cautela" },
+
+  { name: "Australia", enName: "Australia", flag: "🇦🇺", continent: "oceania", capital: "Canberra", currency: "Dollaro australiano (AUD)", language: "Inglese", bestTime: "Set–Nov, Mar–Mag (stagioni intermedie)", visa: "eVisitor obbligatorio (gratuito)", safety: "Molto sicura, attenzione a fauna e sole intenso", plug: "Tipo I, 230V", tipping: "Non prevista", emergency: "000", extra: "Le distanze interne sono enormi: molti spostamenti richiedono un volo." , food: "Barbecue e meat pie" , riskLevel: "sicuro" },
+  { name: "Nuova Zelanda", enName: "New Zealand", flag: "🇳🇿", continent: "oceania", capital: "Wellington", currency: "Dollaro neozelandese (NZD)", language: "Inglese, maori", bestTime: "Dic–Feb (estate australe)", visa: "NZeTA obbligatorio", safety: "Tra le nazioni più sicure al mondo", plug: "Tipo I, 230V", tipping: "Non prevista", emergency: "111", extra: "Il rispetto per la cultura Maori è centrale: informati sulle tradizioni locali." , food: "Hangi (cottura tradizionale Maori)" , riskLevel: "sicuro" },
+  { name: "Figi", enName: "Fiji", flag: "🇫🇯", continent: "oceania", capital: "Suva", currency: "Dollaro delle Figi (FJD)", language: "Inglese, figiano", bestTime: "Mag–Ott (stagione secca)", visa: "Nessun visto fino a 4 mesi", safety: "Sicura", plug: "Tipo I, 240V", tipping: "Non prevista, servizio spesso incluso", emergency: "917 (polizia) / 911 (ambulanza)", extra: "Il \"Fiji time\" è reale: gli orari locali sono spesso flessibili." , food: "Kokoda (ceviche di pesce al cocco)" , riskLevel: "sicuro" },
+  { name: "Polinesia Francese", enName: "French Polynesia", flag: "🇵🇫", continent: "oceania", capital: "Papeete", currency: "Franco CFP (XPF)", language: "Francese, tahitiano", bestTime: "Mag–Ott (stagione secca)", visa: "Nessun visto fino a 90 giorni (regole UE)", safety: "Molto sicura", plug: "Tipo C/E, 220V", tipping: "Non prevista, spesso mal vista", emergency: "17 (polizia) / 15 (ambulanza)", extra: "La valuta locale (Franco CFP) e agganciata al valore dell\'Euro." , food: "Poisson cru (pesce crudo al cocco)" , riskLevel: "sicuro" },
+
+  { name: "Polonia", enName: "Poland", flag: "🇵🇱", continent: "europa", capital: "Varsavia", currency: "Zloty (PLN)", language: "Polacco", bestTime: "Mag-Set", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo C/E, 230V", tipping: "10%", emergency: "112", extra: "La citta vecchia di Cracovia e patrimonio Unesco.", food: "Pierogi (ravioli ripieni)" , riskLevel: "sicuro" },
+  { name: "Ungheria", enName: "Hungary", flag: "🇭🇺", continent: "europa", capital: "Budapest", currency: "Fiorino (HUF)", language: "Ungherese", bestTime: "Apr-Giu, Set-Ott", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo C/F, 230V", tipping: "10%, spesso non incluso", emergency: "112", extra: "Le terme termali sono un'esperienza tipica a Budapest.", food: "Gulasch" , riskLevel: "sicuro" },
+  { name: "Belgio", enName: "Belgium", flag: "🇧🇪", continent: "europa", capital: "Bruxelles", currency: "Euro (EUR)", language: "Francese, olandese, tedesco", bestTime: "Mag-Set", visa: "Nessun visto per UE/Schengen", safety: "Molto sicuro", plug: "Tipo C/E, 230V", tipping: "Servizio spesso incluso", emergency: "112", extra: "Il paese ha piu birrifici che quasi ogni altra nazione al mondo.", food: "Cozze con patatine (moules-frites)" , riskLevel: "sicuro" },
+  { name: "Danimarca", enName: "Denmark", flag: "🇩🇰", continent: "europa", capital: "Copenaghen", currency: "Corona danese (DKK)", language: "Danese", bestTime: "Mag-Set", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo C/K, 230V", tipping: "Non necessaria, servizio incluso", emergency: "112", extra: "La bicicletta e il mezzo di trasporto piu diffuso a Copenaghen.", food: "Smorrebrod (tartina aperta)" , riskLevel: "sicuro" },
+  { name: "Finlandia", enName: "Finland", flag: "🇫🇮", continent: "europa", capital: "Helsinki", currency: "Euro (EUR)", language: "Finlandese", bestTime: "Giu-Ago (estate), Dic-Mar (aurore)", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo C/F, 230V", tipping: "Non necessaria", emergency: "112", extra: "La sauna e una tradizione nazionale, presente quasi ovunque.", food: "Salmone affumicato" , riskLevel: "sicuro" },
+  { name: "Malta", enName: "Malta", flag: "🇲🇹", continent: "europa", capital: "La Valletta", currency: "Euro (EUR)", language: "Maltese, inglese", bestTime: "Apr-Giu, Set-Ott", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo G, 230V", tipping: "10%", emergency: "112", extra: "L'arcipelago si esplora facilmente anche in traghetto tra le isole.", food: "Fenkata (stufato di coniglio)" , riskLevel: "sicuro" },
+
+  { name: "Israele", enName: "Israel", flag: "🇮🇱", continent: "asia", capital: "Gerusalemme", currency: "Nuovo Shekel (ILS)", language: "Ebraico, arabo", bestTime: "Mar-Mag, Set-Nov", visa: "Nessun visto fino a 90 giorni", safety: "Il conflitto con Gaza e le tensioni con Libano e Iran rendono il quadro instabile: molte cancellerie raccomandano cautela o sconsigliano alcune aree (in particolare Gaza e i confini). Verifica sempre gli avvisi aggiornati", plug: "Tipo C/H, 230V", tipping: "10-12%", emergency: "100 (polizia) / 101 (ambulanza)", extra: "Lo shabbat (venerdi sera-sabato) chiude molte attivita commerciali.", food: "Hummus e falafel" , riskLevel: "cautela" },
+  { name: "Giordania", enName: "Jordan", flag: "🇯🇴", continent: "asia", capital: "Amman", currency: "Dinaro giordano (JOD)", language: "Arabo", bestTime: "Mar-Mag, Set-Nov", visa: "Visto all'arrivo o e-visa", safety: "Tra i paesi piu stabili della regione, ma il quadro mediorientale resta instabile: verifica sempre gli avvisi aggiornati", plug: "Tipo C/D/G, 230V", tipping: "10%", emergency: "911", extra: "Petra andrebbe visitata di prima mattina per evitare folla e caldo.", food: "Mansaf (agnello con riso e yogurt)" , riskLevel: "cautela" },
+  { name: "Cambogia", enName: "Cambodia", flag: "🇰🇭", continent: "asia", capital: "Phnom Penh", currency: "Riel (KHR)", language: "Khmer", bestTime: "Nov-Mar (stagione secca)", visa: "Visto all'arrivo o e-visa", safety: "Sicura nelle zone turistiche", plug: "Tipo A/C/G, 230V", tipping: "Gradita, non obbligatoria", emergency: "117 (polizia) / 119 (ambulanza)", extra: "Angkor Wat va visitato all'alba per un'esperienza migliore.", food: "Amok (curry di pesce al cocco)" , riskLevel: "sicuro" },
+  { name: "Laos", enName: "Laos", flag: "🇱🇦", continent: "asia", capital: "Vientiane", currency: "Kip (LAK)", language: "Lao", bestTime: "Nov-Mar (stagione secca)", visa: "Visto all'arrivo", safety: "Sicuro, ritmi di viaggio lenti", plug: "Tipo A/C/E, 230V", tipping: "Non prevista, gradita", emergency: "1191", extra: "Luang Prabang e famosa per la cerimonia mattutina dell'elemosina ai monaci.", food: "Larb (insalata di carne piccante)" , riskLevel: "sicuro" },
+  { name: "Qatar", enName: "Qatar", flag: "🇶🇦", continent: "asia", capital: "Doha", currency: "Riyal del Qatar (QAR)", language: "Arabo, inglese", bestTime: "Nov-Mar (clima mite)", visa: "Nessun visto fino a 30 giorni", safety: "Generalmente sicuro, ma la regione del Golfo è soggetta a tensioni legate al conflitto in Medio Oriente: verifica sempre gli avvisi aggiornati", plug: "Tipo D/G, 230V", tipping: "10%", emergency: "999", extra: "Durante il Ramadan valgono regole particolari su cibo e bevande in pubblico.", food: "Machbous (riso speziato con carne)" , riskLevel: "cautela" },
+  { name: "Bhutan", enName: "Bhutan", flag: "🇧🇹", continent: "asia", capital: "Thimphu", currency: "Ngultrum (BTN)", language: "Dzongkha", bestTime: "Mar-Mag, Set-Nov", visa: "Visto obbligatorio con tariffa giornaliera di sostenibilita", safety: "Molto sicuro", plug: "Tipo C/D/G, 230V", tipping: "Gradita nei tour organizzati", emergency: "113", extra: "Il turismo e regolato da una tariffa giornaliera per proteggere l'ambiente.", food: "Ema datshi (peperoncini e formaggio)" , riskLevel: "sicuro" },
+
+  { name: "Etiopia", enName: "Ethiopia", flag: "🇪🇹", continent: "africa", capital: "Addis Abeba", currency: "Birr (ETB)", language: "Amarico", bestTime: "Ott-Mar (stagione secca)", visa: "e-visa obbligatorio", safety: "Informarsi sulle aree specifiche prima di partire", plug: "Tipo C/F, 220V", tipping: "10%", emergency: "991", extra: "Usa un calendario proprio, indietro di circa 7-8 anni rispetto al nostro.", food: "Injera con wot (stufato speziato)" , riskLevel: "cautela" },
+  { name: "Ghana", enName: "Ghana", flag: "🇬🇭", continent: "africa", capital: "Accra", currency: "Cedi ghanese (GHS)", language: "Inglese", bestTime: "Nov-Mar (stagione secca)", visa: "Visto richiesto in anticipo", safety: "Generalmente sicuro", plug: "Tipo D/G, 230V", tipping: "10%", emergency: "191 (polizia) / 193 (ambulanza)", extra: "Le fortezze coloniali sulla costa sono patrimonio Unesco.", food: "Fufu con zuppa di arachidi" , riskLevel: "sicuro" },
+  { name: "Zambia", enName: "Zambia", flag: "🇿🇲", continent: "africa", capital: "Lusaka", currency: "Kwacha zambiano (ZMW)", language: "Inglese", bestTime: "Mag-Ott (safari, stagione secca)", visa: "e-visa disponibile", safety: "Sicura nei circuiti safari", plug: "Tipo C/D/G, 230V", tipping: "10%, importante per le guide", emergency: "999", extra: "Le cascate Vittoria si affacciano sia sullo Zambia che sullo Zimbabwe.", food: "Nshima con verdure" , riskLevel: "sicuro" },
+  { name: "Botswana", enName: "Botswana", flag: "🇧🇼", continent: "africa", capital: "Gaborone", currency: "Pula (BWP)", language: "Inglese, setswana", bestTime: "Mag-Set (safari, stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Sicuro nei circuiti safari organizzati", plug: "Tipo D/G, 230V", tipping: "10%", emergency: "997", extra: "Il delta dell'Okavango e tra i migliori luoghi al mondo per safari in barca.", food: "Seswaa (carne stufata)" , riskLevel: "sicuro" },
+
+  { name: "Ecuador", enName: "Ecuador", flag: "🇪🇨", continent: "americhe", capital: "Quito", currency: "Dollaro USA (USD)", language: "Spagnolo", bestTime: "Giu-Set (Ande), Dic-Apr (costa)", visa: "Nessun visto fino a 90 giorni", safety: "Sicuro nei circuiti turistici, cautela nelle grandi citta", plug: "Tipo A/B, 120V", tipping: "10%", emergency: "911", extra: "Le Galapagos richiedono una tassa d'ingresso e permessi specifici.", food: "Ceviche ecuadoriano" , riskLevel: "cautela" },
+  { name: "Bolivia", enName: "Bolivia", flag: "🇧🇴", continent: "americhe", capital: "Sucre / La Paz", currency: "Boliviano (BOB)", language: "Spagnolo, quechua, aymara", bestTime: "Mag-Ott (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Sicuro nei circuiti turistici", plug: "Tipo A/C, 230V", tipping: "10%", emergency: "911", extra: "Il Salar de Uyuni crea effetti a specchio spettacolari nella stagione delle piogge.", food: "Saltenas (impasto ripieno)" , riskLevel: "sicuro" },
+  { name: "Panama", enName: "Panama", flag: "🇵🇦", continent: "americhe", capital: "Citta di Panama", currency: "Balboa / Dollaro USA (PAB/USD)", language: "Spagnolo", bestTime: "Dic-Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Sicuro nelle zone turistiche", plug: "Tipo A/B, 120V", tipping: "10%", emergency: "911", extra: "Il Canale di Panama collega Atlantico e Pacifico con un sistema di chiuse.", food: "Sancocho (zuppa di pollo)" , riskLevel: "sicuro" },
+  { name: "Guatemala", enName: "Guatemala", flag: "🇬🇹", continent: "americhe", capital: "Citta del Guatemala", currency: "Quetzal (GTQ)", language: "Spagnolo", bestTime: "Nov-Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Informarsi sulle aree specifiche prima di partire", plug: "Tipo A/B, 120V", tipping: "10%", emergency: "110 (polizia) / 123 (ambulanza)", extra: "Le rovine Maya di Tikal si trovano nel folto della giungla.", food: "Pepian (stufato speziato)" , riskLevel: "cautela" },
+  { name: "Repubblica Dominicana", enName: "Dominican Republic", flag: "🇩🇴", continent: "americhe", capital: "Santo Domingo", currency: "Peso dominicano (DOP)", language: "Spagnolo", bestTime: "Dic-Apr (stagione secca)", visa: "Nessun visto fino a 30 giorni", safety: "Sicura nei resort e zone turistiche", plug: "Tipo A/B, 120V", tipping: "10%", emergency: "911", extra: "Molti resort funzionano all inclusive, comodi per un primo viaggio ai Caraibi.", food: "La bandera (riso, fagioli e carne)" , riskLevel: "sicuro" },
+  { name: "Uruguay", enName: "Uruguay", flag: "🇺🇾", continent: "americhe", capital: "Montevideo", currency: "Peso uruguaiano (UYU)", language: "Spagnolo", bestTime: "Dic-Mar (estate australe)", visa: "Nessun visto fino a 90 giorni", safety: "Uno dei paesi piu sicuri del Sud America", plug: "Tipo C/F/I, 230V", tipping: "10%", emergency: "911", extra: "Il mate si beve praticamente ad ogni ora del giorno.", food: "Asado (grigliata di carne)" , riskLevel: "sicuro" },
+
+  { name: "Vanuatu", enName: "Vanuatu", flag: "🇻🇺", continent: "oceania", capital: "Port Vila", currency: "Vatu (VUV)", language: "Bislama, inglese, francese", bestTime: "Mag-Ott (stagione secca)", visa: "Nessun visto fino a 30 giorni", safety: "Sicura", plug: "Tipo I, 230V", tipping: "Non prevista", emergency: "112", extra: "E possibile visitare vulcani attivi accessibili anche a piedi.", food: "Laplap (impasto di radici con cocco)" , riskLevel: "sicuro" },
+  { name: "Samoa", enName: "Samoa", flag: "🇼🇸", continent: "oceania", capital: "Apia", currency: "Tala samoano (WST)", language: "Samoano, inglese", bestTime: "Mag-Ott (stagione secca)", visa: "Nessun visto fino a 60 giorni", safety: "Sicura", plug: "Tipo I, 230V", tipping: "Non prevista, spesso mal vista", emergency: "999", extra: "Le tradizioni familiari e di villaggio (fa'a Samoa) regolano ancora molta vita quotidiana.", food: "Palusami (foglie di taro con cocco)" , riskLevel: "sicuro" },
+  { name: "Svezia", enName: "Sweden", flag: "🇸🇪", continent: "europa", capital: "Stoccolma", currency: "Corona svedese (SEK)", language: "Svedese", bestTime: "Mag-Ago", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo C/F, 230V", tipping: "Non necessaria", emergency: "112", extra: "Il diritto di vagare permette di camminare liberamente anche su terreni privati.", food: "Kottbullar (polpette con salsa)", riskLevel: "sicuro" },
+  { name: "Slovenia", enName: "Slovenia", flag: "🇸🇮", continent: "europa", capital: "Lubiana", currency: "Euro (EUR)", language: "Sloveno", bestTime: "Mag-Set", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "Il lago di Bled e tra i luoghi piu fotografati d'Europa.", food: "Struklji (rotolo di pasta ripieno)", riskLevel: "sicuro" },
+  { name: "Slovacchia", enName: "Slovakia", flag: "🇸🇰", continent: "europa", capital: "Bratislava", currency: "Euro (EUR)", language: "Slovacco", bestTime: "Mag-Set", visa: "Nessun visto per UE/Schengen", safety: "Sicura", plug: "Tipo C/E, 230V", tipping: "10%", emergency: "112", extra: "Bratislava e una delle capitali piu vicine ad altre due capitali (Vienna e Budapest).", food: "Bryndzove halusky (gnocchi con formaggio)", riskLevel: "sicuro" },
+  { name: "Romania", enName: "Romania", flag: "🇷🇴", continent: "europa", capital: "Bucarest", currency: "Leu romeno (RON)", language: "Romeno", bestTime: "Mag-Set", visa: "Nessun visto per UE/Schengen", safety: "Sicura", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "Il castello di Bran e associato turisticamente alla leggenda di Dracula.", food: "Sarmale (involtini di cavolo)", riskLevel: "sicuro" },
+  { name: "Bulgaria", enName: "Bulgaria", flag: "🇧🇬", continent: "europa", capital: "Sofia", currency: "Lev bulgaro (BGN)", language: "Bulgaro", bestTime: "Mag-Set", visa: "Nessun visto per UE/Schengen", safety: "Sicura", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "Ha alcune delle spiagge piu economiche del Mar Nero.", food: "Banitsa (sfoglia con formaggio)", riskLevel: "sicuro" },
+  { name: "Serbia", enName: "Serbia", flag: "🇷🇸", continent: "europa", capital: "Belgrado", currency: "Dinaro serbo (RSD)", language: "Serbo", bestTime: "Apr-Ott", visa: "Nessun visto fino a 90 giorni", safety: "Sicura", plug: "Tipo F, 230V", tipping: "10%", emergency: "112", extra: "Belgrado ha una vita notturna molto vivace, specie sulle chiatte del fiume.", food: "Cevapi (involtini di carne alla griglia)", riskLevel: "sicuro" },
+  { name: "Bosnia ed Erzegovina", enName: "Bosnia and Herzegovina", flag: "🇧🇦", continent: "europa", capital: "Sarajevo", currency: "Marco convertibile (BAM)", language: "Bosniaco, serbo, croato", bestTime: "Apr-Ott", visa: "Nessun visto fino a 90 giorni", safety: "Sicura; alcune zone rurali hanno ancora residui di mine dalla guerra degli anni '90, resta sui percorsi segnalati", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "122 (polizia)", extra: "Sarajevo mescola influenze ottomane, austro-ungariche e jugoslave in poche vie.", food: "Cevapi e burek", riskLevel: "cautela" },
+  { name: "Montenegro", enName: "Montenegro", flag: "🇲🇪", continent: "europa", capital: "Podgorica", currency: "Euro (EUR, non UE)", language: "Montenegrino", bestTime: "Mag-Set", visa: "Nessun visto fino a 90 giorni", safety: "Sicuro", plug: "Tipo F, 230V", tipping: "10%", emergency: "112", extra: "Le mura di Kotor si affacciano su una delle baie piu spettacolari d'Europa.", food: "Njeguski prsut (prosciutto affumicato)", riskLevel: "sicuro" },
+  { name: "Macedonia del Nord", enName: "North Macedonia", flag: "🇲🇰", continent: "europa", capital: "Skopje", currency: "Denaro macedone (MKD)", language: "Macedone", bestTime: "Mag-Set", visa: "Nessun visto fino a 90 giorni", safety: "Sicura", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "Il lago di Ohrid e patrimonio Unesco sia naturale che culturale.", food: "Tavce gravce (fagioli al forno)", riskLevel: "sicuro" },
+  { name: "Albania", enName: "Albania", flag: "🇦🇱", continent: "europa", capital: "Tirana", currency: "Lek albanese (ALL)", language: "Albanese", bestTime: "Mag-Set", visa: "Nessun visto fino a 90 giorni", safety: "Sicura, in forte crescita turistica", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "La riviera albanese e diventata una meta economica alternativa alla Grecia.", food: "Tave kosi (agnello con yogurt al forno)", riskLevel: "sicuro" },
+  { name: "Lussemburgo", enName: "Luxembourg", flag: "🇱🇺", continent: "europa", capital: "Lussemburgo", currency: "Euro (EUR)", language: "Lussemburghese, francese, tedesco", bestTime: "Mag-Set", visa: "Nessun visto per UE/Schengen", safety: "Molto sicuro", plug: "Tipo C/F, 230V", tipping: "Servizio spesso incluso", emergency: "112", extra: "Tutti i trasporti pubblici sono gratuiti in tutto il paese.", food: "Judd mat gaardebounen (maiale con fave)", riskLevel: "sicuro" },
+  { name: "Lituania", enName: "Lithuania", flag: "🇱🇹", continent: "europa", capital: "Vilnius", currency: "Euro (EUR)", language: "Lituano", bestTime: "Mag-Set", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "Il centro storico di Vilnius e uno dei piu grandi d'Europa orientale.", food: "Cepelinai (gnocchi di patate ripieni)", riskLevel: "sicuro" },
+  { name: "Lettonia", enName: "Latvia", flag: "🇱🇻", continent: "europa", capital: "Riga", currency: "Euro (EUR)", language: "Lettone", bestTime: "Mag-Set", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "Riga ha una delle collezioni di architettura Art Nouveau piu ricche d'Europa.", food: "Rupjmaize (pane di segale nero)", riskLevel: "sicuro" },
+  { name: "Estonia", enName: "Estonia", flag: "🇪🇪", continent: "europa", capital: "Tallinn", currency: "Euro (EUR)", language: "Estone", bestTime: "Mag-Set", visa: "Nessun visto per UE/Schengen", safety: "Molto sicura", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "E uno dei paesi piu digitalizzati al mondo, anche per i servizi pubblici.", food: "Aringhe con patate", riskLevel: "sicuro" },
+  { name: "Cipro", enName: "Cyprus", flag: "🇨🇾", continent: "europa", capital: "Nicosia", currency: "Euro (EUR)", language: "Greco, turco", bestTime: "Apr-Giu, Set-Ott", visa: "Nessun visto per UE/Schengen (area sud)", safety: "Sicura nella parte sud; la parte nord e sotto controllo turco, verifica i confini prima di attraversarli", plug: "Tipo G, 230V", tipping: "10%", emergency: "112", extra: "E l'unica capitale al mondo divisa in due, tra Nicosia sud e nord.", food: "Souvlaki e halloumi grigliato", riskLevel: "cautela" },
+  { name: "Ucraina", enName: "Ukraine", flag: "🇺🇦", continent: "europa", capital: "Kiev", currency: "Grivna (UAH)", language: "Ucraino", bestTime: "Non applicabile in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio turistico", safety: "Paese in guerra dal 2022: conflitto armato attivo, bombardamenti e allerte aeree su gran parte del territorio. Sconsigliato qualsiasi viaggio turistico", plug: "Tipo C/F, 230V", tipping: "-", emergency: "112 (se disponibile)", extra: "Segui sempre gli avvisi ufficiali della Farnesina: la situazione cambia rapidamente.", food: "Borsch e varenyky", riskLevel: "conflitto" },
+  { name: "Moldavia", enName: "Moldova", flag: "🇲🇩", continent: "europa", capital: "Chisinau", currency: "Leu moldavo (MDL)", language: "Romeno", bestTime: "Mag-Set", visa: "Nessun visto fino a 90 giorni", safety: "Sicura; la regione separatista della Transnistria (est) richiede cautela extra ed e sconsigliata senza necessita", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "E tra i maggiori produttori di vino della regione, con cantine sotterranee immense.", food: "Mamaliga con formaggio", riskLevel: "cautela" },
+  { name: "Russia", enName: "Russia", flag: "🇷🇺", continent: "europa", capital: "Mosca", currency: "Rublo russo (RUB)", language: "Russo", bestTime: "Non applicabile in questo momento", visa: "Visto necessario; la maggior parte dei paesi occidentali sconsiglia il viaggio", safety: "Paese in guerra con l'Ucraina dal 2022, con forti restrizioni, rischio di controlli arbitrari e voli internazionali limitati. Molte cancellerie occidentali sconsigliano il viaggio", plug: "Tipo C/F, 220V", tipping: "10%", emergency: "112", extra: "Le sanzioni internazionali rendono spesso impossibili pagamenti con carte estere.", food: "Borsch e pelmeni", riskLevel: "conflitto" },
+  { name: "Bielorussia", enName: "Belarus", flag: "🇧🇾", continent: "europa", capital: "Minsk", currency: "Rublo bielorusso (BYN)", language: "Bielorusso, russo", bestTime: "Non consigliato in questo momento", visa: "Visto necessario; molte cancellerie occidentali sconsigliano viaggi non essenziali", safety: "Regime autoritario con forte repressione del dissenso e rischio di controlli arbitrari verso stranieri; diverse cancellerie occidentali classificano il paese a rischio Do Not Travel", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "I confini con Ucraina, Polonia, Lituania e Lettonia sono spesso soggetti a restrizioni.", food: "Draniki (frittelle di patate)", riskLevel: "conflitto" },
+  { name: "Monaco", enName: "Monaco", flag: "🇲🇨", continent: "europa", capital: "Monte-Carlo", currency: "Euro (EUR)", language: "Francese", bestTime: "Mag-Set", visa: "Nessun visto (adiacente Francia, Schengen)", safety: "Molto sicuro, tra le zone con piu densita di sicurezza privata al mondo", plug: "Tipo C/E, 230V", tipping: "Servizio spesso incluso", emergency: "112 (17 polizia locale)", extra: "E il secondo stato piu piccolo al mondo dopo il Vaticano.", food: "Barbagiuan (ravioli fritti)", riskLevel: "sicuro" },
+  { name: "San Marino", enName: "San Marino", flag: "🇸🇲", continent: "europa", capital: "San Marino", currency: "Euro (EUR, non UE)", language: "Italiano", bestTime: "Apr-Ott", visa: "Nessun visto (enclave in Italia)", safety: "Molto sicuro", plug: "Tipo C/F/L, 230V", tipping: "Non necessaria", emergency: "112", extra: "E la repubblica piu antica ancora esistente al mondo.", food: "Piada e formaggio di fossa", riskLevel: "sicuro" },
+
+  { name: "Corea del Nord", enName: "North Korea", flag: "🇰🇵", continent: "asia", capital: "Pyongyang", currency: "Won nordcoreano (non convertibile)", language: "Coreano", bestTime: "Set-Ott (unica finestra con tour organizzati)", visa: "Visto necessario, solo tramite tour organizzati con guida governativa obbligatoria", safety: "Stato totalitario isolato: viaggio possibile solo con tour autorizzati e sorveglianza costante; sconsigliato senza necessita", plug: "Tipo A/C, 220V", tipping: "Non prevista", emergency: "-", extra: "Ogni spostamento e sorvegliato da una guida governativa assegnata al gruppo.", food: "Naengmyeon (noodles freddi)", riskLevel: "conflitto" },
+  { name: "Mongolia", enName: "Mongolia", flag: "🇲🇳", continent: "asia", capital: "Ulan Bator", currency: "Tugrik (MNT)", language: "Mongolo", bestTime: "Giu-Set", visa: "Nessun visto fino a 30 giorni", safety: "Sicura, distanze enormi e infrastrutture limitate fuori dalla capitale", plug: "Tipo C/E, 230V", tipping: "Non prevista, gradita", emergency: "105 (polizia)", extra: "Gran parte del territorio e ancora abitato da pastori nomadi in yurte.", food: "Buuz (ravioli al vapore di montone)", riskLevel: "sicuro" },
+  { name: "Kazakistan", enName: "Kazakhstan", flag: "🇰🇿", continent: "asia", capital: "Astana", currency: "Tenge (KZT)", language: "Kazako, russo", bestTime: "Mag-Set", visa: "Nessun visto fino a 30 giorni", safety: "Sicuro", plug: "Tipo C/F, 220V", tipping: "10%", emergency: "112", extra: "E il piu grande paese senza sbocco sul mare al mondo.", food: "Beshbarmak (carne bollita con pasta)", riskLevel: "sicuro" },
+  { name: "Uzbekistan", enName: "Uzbekistan", flag: "🇺🇿", continent: "asia", capital: "Tashkent", currency: "Som uzbeco (UZS)", language: "Uzbeco", bestTime: "Mar-Mag, Set-Nov", visa: "e-visa disponibile", safety: "Sicuro", plug: "Tipo C/F, 220V", tipping: "10%", emergency: "102 (polizia)", extra: "Samarcanda e Bukhara conservano architetture della via della seta quasi intatte.", food: "Plov (riso con carne)", riskLevel: "sicuro" },
+  { name: "Pakistan", enName: "Pakistan", flag: "🇵🇰", continent: "asia", capital: "Islamabad", currency: "Rupia pakistana (PKR)", language: "Urdu, inglese", bestTime: "Ott-Apr", visa: "e-visa necessario", safety: "Sicurezza molto variabile: alcune regioni di confine (nord-ovest, Balochistan) sono a forte rischio militanza e vanno evitate; le città principali richiedono comunque cautela extra", plug: "Tipo C/D, 230V", tipping: "10%", emergency: "15 (polizia)", extra: "I paesaggi del Karakoram sono tra i piu spettacolari al mondo per il trekking.", food: "Biryani e nihari", riskLevel: "cautela" },
+  { name: "Bangladesh", enName: "Bangladesh", flag: "🇧🇩", continent: "asia", capital: "Dacca", currency: "Taka (BDT)", language: "Bengalese", bestTime: "Nov-Feb (stagione secca)", visa: "e-visa o visto all'arrivo", safety: "Generalmente sicuro, cautela nei periodi di tensione politica interna", plug: "Tipo C/D/G, 220V", tipping: "Gradita, non obbligatoria", emergency: "999", extra: "Ospita la piu grande foresta di mangrovie al mondo, i Sundarban.", food: "Riso con curry di pesce", riskLevel: "cautela" },
+  { name: "Myanmar", enName: "Myanmar", flag: "🇲🇲", continent: "asia", capital: "Naypyidaw", currency: "Kyat (MMK)", language: "Birmano", bestTime: "Non consigliato in questo momento", visa: "e-visa disponibile ma sconsigliato viaggiare", safety: "Paese in guerra civile dal colpo di stato del 2021, con combattimenti in diverse regioni: la maggior parte delle cancellerie occidentali sconsiglia il viaggio", plug: "Tipo C/D/G, 230V", tipping: "Non prevista", emergency: "-", extra: "Le pagode di Bagan restano tra i siti piu impressionanti del sud-est asiatico, ma l'accesso e instabile.", food: "Mohinga (zuppa di pesce con noodles)", riskLevel: "conflitto" },
+  { name: "Brunei", enName: "Brunei", flag: "🇧🇳", continent: "asia", capital: "Bandar Seri Begawan", currency: "Dollaro del Brunei (BND)", language: "Malese", bestTime: "Mar-Ott", visa: "Nessun visto fino a 90 giorni", safety: "Molto sicuro, leggi molto rigide (no alcol pubblico)", plug: "Tipo G, 240V", tipping: "Non prevista", emergency: "993 (polizia)", extra: "Il palazzo del sultano e tra le residenze reali piu grandi al mondo.", food: "Ambuyat (impasto di sago)", riskLevel: "sicuro" },
+  { name: "Timor Est", enName: "East Timor", flag: "🇹🇱", continent: "asia", capital: "Dili", currency: "Dollaro USA (USD)", language: "Tetum, portoghese", bestTime: "Mag-Nov (stagione secca)", visa: "Visto all'arrivo", safety: "Sicurezza migliorata ma cautela extra fuori Dili, infrastrutture limitate", plug: "Tipo C/E/I, 220V", tipping: "Non prevista", emergency: "112", extra: "Il diving nelle sue acque incontaminate e tra i piu apprezzati del sud-est asiatico.", food: "Batar da'an (mais con fagioli e zucca)", riskLevel: "cautela" },
+  { name: "Arabia Saudita", enName: "Saudi Arabia", flag: "🇸🇦", continent: "asia", capital: "Riad", currency: "Riyal saudita (SAR)", language: "Arabo", bestTime: "Nov-Mar (clima mite)", visa: "e-visa disponibile", safety: "Generalmente sicura, ma le tensioni regionali in Medio Oriente possono cambiare rapidamente il quadro: verifica sempre gli avvisi aggiornati", plug: "Tipo G, 230V", tipping: "10%", emergency: "999 (polizia)", extra: "Il turismo internazionale e stato aperto solo di recente, dal 2019.", food: "Kabsa (riso speziato con carne)", riskLevel: "cautela" },
+  { name: "Kuwait", enName: "Kuwait", flag: "🇰🇼", continent: "asia", capital: "Kuwait City", currency: "Dinaro kuwaitiano (KWD)", language: "Arabo", bestTime: "Nov-Mar", visa: "e-visa disponibile", safety: "Generalmente sicuro ma soggetto a tensioni regionali in Medio Oriente: verifica sempre gli avvisi aggiornati", plug: "Tipo G, 240V", tipping: "10%", emergency: "112", extra: "Ha una delle valute piu forti al mondo per unita.", food: "Machboos (riso speziato con carne)", riskLevel: "cautela" },
+  { name: "Bahrain", enName: "Bahrain", flag: "🇧🇭", continent: "asia", capital: "Manama", currency: "Dinaro del Bahrein (BHD)", language: "Arabo", bestTime: "Nov-Mar", visa: "e-visa disponibile", safety: "Generalmente sicuro ma soggetto a tensioni regionali in Medio Oriente: verifica sempre gli avvisi aggiornati", plug: "Tipo G, 230V", tipping: "10%", emergency: "999", extra: "E collegato all'Arabia Saudita da un ponte di 25 km sul mare.", food: "Machboos e halwa", riskLevel: "cautela" },
+  { name: "Oman", enName: "Oman", flag: "🇴🇲", continent: "asia", capital: "Muscat", currency: "Rial omanita (OMR)", language: "Arabo", bestTime: "Ott-Apr", visa: "e-visa disponibile", safety: "Generalmente sicuro, tra i piu stabili della regione, ma verifica sempre gli avvisi aggiornati per le tensioni regionali", plug: "Tipo G, 240V", tipping: "10%", emergency: "9999", extra: "I canyon e le montagne dell'interno offrono trekking spettacolari poco conosciuti.", food: "Shuwa (agnello marinato cotto sottoterra)", riskLevel: "cautela" },
+  { name: "Yemen", enName: "Yemen", flag: "🇾🇪", continent: "asia", capital: "Sana'a", currency: "Rial yemenita (YER)", language: "Arabo", bestTime: "Non applicabile in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio", safety: "Paese in guerra civile dal 2015, tra i contesti piu pericolosi al mondo per crisi umanitaria, combattimenti e rischio di rapimento. Sconsigliato qualsiasi viaggio", plug: "Tipo A/D/G, 230V", tipping: "-", emergency: "-", extra: "La citta vecchia di Sana'a, patrimonio Unesco, resta inaccessibile ai turisti nella situazione attuale.", food: "Mandi (riso e carne speziati)", riskLevel: "conflitto" },
+  { name: "Iraq", enName: "Iraq", flag: "🇮🇶", continent: "asia", capital: "Baghdad", currency: "Dinaro iracheno (IQD)", language: "Arabo, curdo", bestTime: "Non consigliato in questo momento", visa: "e-visa disponibile ma sconsigliato viaggiare", safety: "Rischio di conflitto armato e terrorismo elevato in gran parte del paese: sconsigliato ogni viaggio non essenziale", plug: "Tipo C/D/G, 230V", tipping: "10%", emergency: "104 (polizia)", extra: "Il Kurdistan iracheno nel nord e relativamente piu stabile del resto del paese, ma va verificato caso per caso.", food: "Masgouf (pesce alla griglia)", riskLevel: "conflitto" },
+  { name: "Iran", enName: "Iran", flag: "🇮🇷", continent: "asia", capital: "Teheran", currency: "Rial iraniano (IRR)", language: "Persiano", bestTime: "Mar-Mag, Set-Nov", visa: "Visto necessario in anticipo", safety: "Tensioni regionali elevate e rischio di rapida escalation: molte cancellerie sconsigliano il viaggio in questo momento, verifica sempre gli avvisi aggiornati", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "110 (polizia)", extra: "Isfahan e Persepoli custodiscono architetture persiane tra le meglio conservate al mondo.", food: "Kebab e riso allo zafferano", riskLevel: "conflitto" },
+  { name: "Siria", enName: "Syria", flag: "🇸🇾", continent: "asia", capital: "Damasco", currency: "Lira siriana (SYP)", language: "Arabo", bestTime: "Non applicabile in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio", safety: "Paese in guerra civile dal 2011: nonostante alcuni sviluppi politici recenti, gran parte del territorio resta instabile, con rischio di combattimenti, mine e rapimento. Sconsigliato qualsiasi viaggio", plug: "Tipo C/E/L, 220V", tipping: "-", emergency: "-", extra: "Molti siti Unesco come Palmira hanno subito danni gravi durante il conflitto.", food: "Kibbeh e hummus", riskLevel: "conflitto" },
+  { name: "Libano", enName: "Lebanon", flag: "🇱🇧", continent: "asia", capital: "Beirut", currency: "Lira libanese (LBP)", language: "Arabo, francese", bestTime: "Apr-Giu, Set-Ott", visa: "Visto all'arrivo per molte nazionalita", safety: "Crisi economica profonda e tensioni regionali con rischio di escalation improvvisa: verifica sempre gli avvisi aggiornati prima di partire", plug: "Tipo C/D/G, 220V", tipping: "10%", emergency: "112", extra: "Beirut viene ancora chiamata 'la Parigi del Medio Oriente' per la sua vita culturale.", food: "Mezze libanese e hummus", riskLevel: "conflitto" },
+  { name: "Armenia", enName: "Armenia", flag: "🇦🇲", continent: "asia", capital: "Yerevan", currency: "Dram armeno (AMD)", language: "Armeno", bestTime: "Mag-Ott", visa: "Nessun visto fino a 180 giorni", safety: "Generalmente sicura; la regione contesa del Nagorno-Karabakh e le aree di confine con l'Azerbaigian vanno evitate", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "911", extra: "E il primo paese ad aver adottato il cristianesimo come religione di stato, nel 301 d.C.", food: "Khorovats (carne alla griglia)", riskLevel: "cautela" },
+  { name: "Azerbaigian", enName: "Azerbaijan", flag: "🇦🇿", continent: "asia", capital: "Baku", currency: "Manat azero (AZN)", language: "Azero", bestTime: "Apr-Giu, Set-Ott", visa: "e-visa disponibile", safety: "Generalmente sicuro; le aree di confine con l'Armenia nella regione del Nagorno-Karabakh vanno evitate", plug: "Tipo C/F, 220V", tipping: "10%", emergency: "102 (polizia)", extra: "Baku mescola grattacieli futuristici e una citta vecchia patrimonio Unesco.", food: "Plov azero e dolma", riskLevel: "cautela" },
+  { name: "Maldive", enName: "Maldives", flag: "🇲🇻", continent: "asia", capital: "Male", currency: "Rufiyaa (MVR)", language: "Dhivehi", bestTime: "Nov-Apr (stagione secca)", visa: "Visto all'arrivo incluso nel biglietto", safety: "Molto sicure nei resort, che occupano isole private separate", plug: "Tipo G/J/D, 230V", tipping: "10%, spesso incluso nei resort all-inclusive", emergency: "119 (polizia)", extra: "Molte isole sono a rischio erosione per l'innalzamento del livello del mare.", food: "Mas huni (tonno con cocco grattugiato)", riskLevel: "sicuro" },
+  { name: "Taiwan", enName: "Taiwan", flag: "🇹🇼", continent: "asia", capital: "Taipei", currency: "Nuovo dollaro taiwanese (TWD)", language: "Cinese mandarino", bestTime: "Ott-Dic, Mar-Apr", visa: "Nessun visto fino a 90 giorni", safety: "Molto sicura; le tensioni politiche con la Cina sono da monitorare ma senza impatto diretto sui turisti finora", plug: "Tipo A/B, 110V", tipping: "Non prevista, servizio spesso incluso", emergency: "110 (polizia) / 119 (ambulanza)", extra: "I mercati notturni sono un'istituzione sociale, non solo turistica.", food: "Beef noodle soup e bubble tea", riskLevel: "cautela" },
+  { name: "Afghanistan", enName: "Afghanistan", flag: "🇦🇫", continent: "asia", capital: "Kabul", currency: "Afghani (AFN)", language: "Pashto, dari", bestTime: "Non applicabile in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio", safety: "Sotto il controllo dei talebani dal 2021, con rischio di terrorismo, restrizioni severissime (specialmente per le donne) e assenza di supporto diplomatico per la maggior parte dei paesi occidentali. Sconsigliato qualsiasi viaggio turistico", plug: "Tipo C/D, 220V", tipping: "-", emergency: "-", extra: "La valle di Bamiyan ospitava le antiche statue del Buddha, distrutte nel 2001.", food: "Kabuli pulao (riso con agnello e uvetta)", riskLevel: "conflitto" },
+  { name: "Algeria", enName: "Algeria", flag: "🇩🇿", continent: "africa", capital: "Algeri", currency: "Dinaro algerino (DZD)", language: "Arabo, francese", bestTime: "Mar-Mag, Set-Nov", visa: "Visto necessario in anticipo", safety: "Rischio terrorismo in alcune aree del sud e delle zone di confine: informati sull'area specifica prima di partire", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "17 (polizia)", extra: "Il Sahara algerino ospita alcune delle dune piu alte del mondo.", food: "Couscous algerino", riskLevel: "cautela" },
+  { name: "Libia", enName: "Libya", flag: "🇱🇾", continent: "africa", capital: "Tripoli", currency: "Dinaro libico (LYD)", language: "Arabo", bestTime: "Non consigliato in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio", safety: "Instabilita politica e conflitti armati diffusi dal 2011: sconsigliato qualsiasi viaggio non essenziale", plug: "Tipo C/D/L, 230V", tipping: "-", emergency: "-", extra: "Le rovine romane di Leptis Magna sono tra le meglio conservate al mondo, ma inaccessibili in sicurezza.", food: "Couscous libico e bazin", riskLevel: "conflitto" },
+  { name: "Sudan", enName: "Sudan", flag: "🇸🇩", continent: "africa", capital: "Khartum", currency: "Sterlina sudanese (SDG)", language: "Arabo", bestTime: "Non applicabile in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio", safety: "Guerra civile in corso dal 2023 tra esercito e forze paramilitari, con crisi umanitaria grave in molte aree: sconsigliato qualsiasi viaggio", plug: "Tipo C/D, 230V", tipping: "-", emergency: "-", extra: "Le piramidi di Meroe, spesso meno conosciute di quelle egizie, restano inaccessibili in sicurezza.", food: "Ful medames (fave stufate)", riskLevel: "conflitto" },
+  { name: "Sud Sudan", enName: "South Sudan", flag: "🇸🇸", continent: "africa", capital: "Juba", currency: "Sterlina sudsudanese (SSP)", language: "Inglese", bestTime: "Non applicabile in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio", safety: "Conflitti etnici e instabilita diffusa dall'indipendenza nel 2011: sconsigliato qualsiasi viaggio non essenziale", plug: "Tipo C/D, 230V", tipping: "-", emergency: "-", extra: "E uno dei paesi piu giovani del mondo, indipendente solo dal 2011.", food: "Riso con stufato di carne", riskLevel: "conflitto" },
+  { name: "Nigeria", enName: "Nigeria", flag: "🇳🇬", continent: "africa", capital: "Abuja", currency: "Naira (NGN)", language: "Inglese", bestTime: "Nov-Feb (stagione secca)", visa: "Visto necessario in anticipo", safety: "Rischio elevato di criminalita, rapimenti e terrorismo in diverse regioni (nord-est, delta del Niger): informati sull'area specifica, molte cancellerie sconsigliano gran parte del territorio", plug: "Tipo D/G, 230V", tipping: "10%", emergency: "112", extra: "Lagos e una delle megalopoli in piu rapida crescita al mondo.", food: "Jollof rice", riskLevel: "conflitto" },
+  { name: "Costa d'Avorio", enName: "Ivory Coast", flag: "🇨🇮", continent: "africa", capital: "Yamoussoukro", currency: "Franco CFA (XOF)", language: "Francese", bestTime: "Nov-Mar (stagione secca)", visa: "Visto necessario in anticipo", safety: "Generalmente sicura nelle principali città, cautela nelle zone di confine nord", plug: "Tipo C/E, 230V", tipping: "10%", emergency: "111 (polizia)", extra: "Yamoussoukro ospita una basilica più grande di San Pietro in Vaticano.", food: "Attieke con pesce", riskLevel: "cautela" },
+  { name: "Mali", enName: "Mali", flag: "🇲🇱", continent: "africa", capital: "Bamako", currency: "Franco CFA (XOF)", language: "Francese", bestTime: "Non consigliato in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio", safety: "Insurrezione jihadista attiva su gran parte del territorio dal 2012, con colpi di stato recenti: sconsigliato qualsiasi viaggio non essenziale", plug: "Tipo C/E, 220V", tipping: "-", emergency: "-", extra: "Timbuctu, storico crocevia carovaniero, resta inaccessibile in sicurezza.", food: "Riso con salsa di arachidi", riskLevel: "conflitto" },
+  { name: "Niger", enName: "Niger", flag: "🇳🇪", continent: "africa", capital: "Niamey", currency: "Franco CFA (XOF)", language: "Francese", bestTime: "Non consigliato in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio", safety: "Insurrezione jihadista e instabilita politica dopo il colpo di stato del 2023: sconsigliato qualsiasi viaggio non essenziale", plug: "Tipo A/B/C, 220V", tipping: "-", emergency: "-", extra: "Gran parte del territorio e desertico, nella fascia del Sahel piu colpita dalla crisi.", food: "Riso con salsa di arachidi", riskLevel: "conflitto" },
+  { name: "Burkina Faso", enName: "Burkina Faso", flag: "🇧🇫", continent: "africa", capital: "Ouagadougou", currency: "Franco CFA (XOF)", language: "Francese", bestTime: "Non consigliato in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio", safety: "Insurrezione jihadista diffusa su gran parte del territorio: sconsigliato qualsiasi viaggio non essenziale", plug: "Tipo C/E, 220V", tipping: "-", emergency: "-", extra: "Prima della crisi era noto per il festival cinematografico FESPACO, tra i piu importanti d'Africa.", food: "Riso con salsa di arachidi e tô", riskLevel: "conflitto" },
+  { name: "Camerun", enName: "Cameroon", flag: "🇨🇲", continent: "africa", capital: "Yaounde", currency: "Franco CFA (XAF)", language: "Francese, inglese", bestTime: "Nov-Feb (stagione secca)", visa: "Visto necessario in anticipo", safety: "Cautela nelle regioni anglofone nord-ovest/sud-ovest e nell'estremo nord per conflitti locali; il resto del paese e piu stabile", plug: "Tipo C/E, 220V", tipping: "10%", emergency: "117 (polizia)", extra: "E chiamato 'Africa in miniatura' per la varieta di paesaggi e climi.", food: "Ndole (stufato di foglie amare)", riskLevel: "cautela" },
+  { name: "Repubblica Democratica del Congo", enName: "Democratic Republic of the Congo", flag: "🇨🇩", continent: "africa", capital: "Kinshasa", currency: "Franco congolese (CDF)", language: "Francese", bestTime: "Giu-Set (stagione secca)", visa: "Visto necessario in anticipo", safety: "Conflitti armati attivi nell'est del paese (regione dei Grandi Laghi): sconsigliato qualsiasi viaggio in quelle aree, cautela estrema anche altrove", plug: "Tipo C/D, 220V", tipping: "10%", emergency: "112", extra: "Ospita la seconda foresta pluviale piu grande al mondo dopo l'Amazzonia.", food: "Fufu con pesce in foglia di banana", riskLevel: "conflitto" },
+  { name: "Angola", enName: "Angola", flag: "🇦🇴", continent: "africa", capital: "Luanda", currency: "Kwanza (AOA)", language: "Portoghese", bestTime: "Mag-Set (stagione secca)", visa: "e-visa disponibile", safety: "Generalmente sicura nelle principali città", plug: "Tipo C, 220V", tipping: "10%", emergency: "113 (polizia)", extra: "Le cascate di Kalandula sono tra le più imponenti d'Africa, ma poco visitate.", food: "Muamba de galinha (pollo in salsa di palma)", riskLevel: "cautela" },
+  { name: "Mozambico", enName: "Mozambique", flag: "🇲🇿", continent: "africa", capital: "Maputo", currency: "Metical (MZN)", language: "Portoghese", bestTime: "Mag-Ott (stagione secca)", visa: "Visto all'arrivo disponibile", safety: "Generalmente sicuro nelle zone turistiche costiere, cautela nel nord (Cabo Delgado) per conflitto locale", plug: "Tipo C/M, 220V", tipping: "10%", emergency: "119 (polizia)", extra: "L'arcipelago di Bazaruto e tra le mete diving meno affollate dell'Oceano Indiano.", food: "Piri-piri (pollo speziato)", riskLevel: "cautela" },
+  { name: "Zimbabwe", enName: "Zimbabwe", flag: "🇿🇼", continent: "africa", capital: "Harare", currency: "Dollaro USA (di fatto)", language: "Inglese", bestTime: "Mag-Ott (safari, stagione secca)", visa: "Visto all'arrivo disponibile", safety: "Generalmente sicuro per i turisti, instabilita economica diffusa", plug: "Tipo D/G, 220V", tipping: "10%", emergency: "999", extra: "Le cascate Vittoria si affacciano anche sullo Zambia, dal lato opposto del fiume.", food: "Sadza con carne o verdure", riskLevel: "cautela" },
+  { name: "Uganda", enName: "Uganda", flag: "🇺🇬", continent: "africa", capital: "Kampala", currency: "Scellino ugandese (UGX)", language: "Inglese", bestTime: "Giu-Set, Dic-Feb (stagioni secche)", visa: "e-visa obbligatorio", safety: "Sicuro nei circuiti turistici organizzati", plug: "Tipo G, 240V", tipping: "10%, importante per le guide", emergency: "999 (112 da cellulare)", extra: "E uno dei pochi luoghi al mondo dove si possono trekkare i gorilla di montagna.", food: "Matoke (banane verdi stufate)", riskLevel: "cautela" },
+  { name: "Ruanda", enName: "Rwanda", flag: "🇷🇼", continent: "africa", capital: "Kigali", currency: "Franco ruandese (RWF)", language: "Kinyarwanda, francese, inglese", bestTime: "Giu-Set (stagione secca)", visa: "Visto all'arrivo disponibile", safety: "Molto sicuro, tra i paesi piu ordinati e sicuri dell'Africa", plug: "Tipo C/J, 230V", tipping: "10%, importante per le guide safari", emergency: "112", extra: "Kigali e nota come una delle citta piu pulite dell'Africa, con divieto di sacchetti di plastica.", food: "Ubugali con fagioli", riskLevel: "sicuro" },
+  { name: "Somalia", enName: "Somalia", flag: "🇸🇴", continent: "africa", capital: "Mogadiscio", currency: "Scellino somalo (SOS)", language: "Somalo, arabo", bestTime: "Non applicabile in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio", safety: "Conflitto armato e presenza di gruppi terroristici (al-Shabaab) su gran parte del territorio: sconsigliato qualsiasi viaggio", plug: "Tipo C/D/G, 230V", tipping: "-", emergency: "-", extra: "Ha una delle coste piu lunghe dell'Africa, quasi 3.300 km.", food: "Bariis iskukaris (riso speziato con carne)", riskLevel: "conflitto" },
+  { name: "Repubblica Centrafricana", enName: "Central African Republic", flag: "🇨🇫", continent: "africa", capital: "Bangui", currency: "Franco CFA (XAF)", language: "Francese, sango", bestTime: "Non consigliato in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio", safety: "Conflitti armati diffusi tra gruppi armati e forze governative dal 2012: sconsigliato qualsiasi viaggio non essenziale", plug: "Tipo C/E, 220V", tipping: "-", emergency: "-", extra: "Gran parte del territorio e ricoperto da foresta pluviale poco esplorata.", food: "Riso con salsa di arachidi e cassava", riskLevel: "conflitto" },
+  { name: "Madagascar", enName: "Madagascar", flag: "🇲🇬", continent: "africa", capital: "Antananarivo", currency: "Ariary malgascio (MGA)", language: "Malgascio, francese", bestTime: "Apr-Nov (stagione secca)", visa: "Visto all'arrivo disponibile", safety: "Generalmente sicuro, cautela per criminalita comune in alcune aree urbane", plug: "Tipo C/D/E, 220V", tipping: "10%", emergency: "117 (polizia)", extra: "Oltre il 90% delle specie animali dell'isola non si trova in nessun altro luogo al mondo.", food: "Romazava (stufato di carne e verdure)", riskLevel: "cautela" },
+  { name: "Mauritius", enName: "Mauritius", flag: "🇲🇺", continent: "africa", capital: "Port Louis", currency: "Rupia mauriziana (MUR)", language: "Inglese, francese, creolo mauriziano", bestTime: "Mag-Dic (stagione piu secca)", visa: "Nessun visto fino a 90 giorni", safety: "Molto sicura, tra le mete piu tranquille dell'Oceano Indiano", plug: "Tipo C/G, 230V", tipping: "10%, spesso incluso nei resort", emergency: "999 (polizia)", extra: "Ospitava il dodo, uccello estinto dal XVII secolo, oggi simbolo dell'isola.", food: "Dholl puri (piadina con lenticchie)", riskLevel: "sicuro" },
+  { name: "Seychelles", enName: "Seychelles", flag: "🇸🇨", continent: "africa", capital: "Victoria", currency: "Rupia delle Seychelles (SCR)", language: "Creolo delle Seychelles, francese, inglese", bestTime: "Apr-Mag, Ott-Nov (stagioni intermedie)", visa: "Nessun visto, permesso turistico all'arrivo", safety: "Molto sicure", plug: "Tipo G, 240V", tipping: "10%, spesso incluso nei resort", emergency: "999 (polizia)", extra: "Sono l'arcipelago piu antico del mondo formato da granito, non da corallo.", food: "Curry di pesce con riso", riskLevel: "sicuro" },
+  { name: "Capo Verde", enName: "Cape Verde", flag: "🇨🇻", continent: "africa", capital: "Praia", currency: "Escudo capoverdiano (CVE)", language: "Portoghese", bestTime: "Nov-Giu (stagione secca)", visa: "Visto all'arrivo disponibile", safety: "Sicuro, tra le mete piu stabili dell'Africa occidentale", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "132 (polizia)", extra: "La musica morna, patrimonio Unesco, nasce proprio su queste isole.", food: "Cachupa (stufato di mais e fagioli)", riskLevel: "sicuro" },
+  { name: "Eswatini", enName: "Eswatini", flag: "🇸🇿", continent: "africa", capital: "Mbabane", currency: "Lilangeni (SZL)", language: "Swati, inglese", bestTime: "Mag-Set (stagione secca)", visa: "Nessun visto fino a 30 giorni", safety: "Generalmente sicuro", plug: "Tipo M, 230V", tipping: "10%", emergency: "999 (polizia)", extra: "E una delle ultime monarchie assolute rimaste al mondo.", food: "Sishwala (porridge di mais) con carne", riskLevel: "cautela" },
+
+  { name: "Venezuela", enName: "Venezuela", flag: "🇻🇪", continent: "americhe", capital: "Caracas", currency: "Bolivar (VES)", language: "Spagnolo", bestTime: "Dic-Apr (stagione secca)", visa: "Visto necessario in anticipo", safety: "Crisi politica ed economica grave, con criminalita molto elevata e forti tensioni internazionali: sconsigliato qualsiasi viaggio non essenziale", plug: "Tipo A/B, 120V", tipping: "10%", emergency: "911", extra: "Il Salto Angel e la cascata piu alta del mondo, ma poco accessibile nella situazione attuale.", food: "Arepas (focaccine di mais ripiene)", riskLevel: "conflitto" },
+  { name: "Paraguay", enName: "Paraguay", flag: "🇵🇾", continent: "americhe", capital: "Asuncion", currency: "Guarani (PYG)", language: "Spagnolo, guarani", bestTime: "Mag-Set (inverno piu mite)", visa: "Nessun visto fino a 90 giorni", safety: "Generalmente sicuro", plug: "Tipo C, 220V", tipping: "10%", emergency: "911", extra: "Le rovine gesuitiche di Trinidad sono patrimonio Unesco poco visitato.", food: "Sopa paraguaya (torta salata di mais)", riskLevel: "sicuro" },
+  { name: "Honduras", enName: "Honduras", flag: "🇭🇳", continent: "americhe", capital: "Tegucigalpa", currency: "Lempira (HNL)", language: "Spagnolo", bestTime: "Nov-Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Tra i paesi con i tassi di criminalita violenta piu alti dell'America Centrale: informati sull'area specifica, evita gli spostamenti notturni", plug: "Tipo A/B, 110V", tipping: "10%", emergency: "911", extra: "Le rovine Maya di Copan sono tra le piu elaborate dell'intera area maya.", food: "Baleada (tortilla ripiena)", riskLevel: "cautela" },
+  { name: "El Salvador", enName: "El Salvador", flag: "🇸🇻", continent: "americhe", capital: "San Salvador", currency: "Dollaro USA (USD)", language: "Spagnolo", bestTime: "Nov-Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "La criminalita e calata molto negli ultimi anni grazie a misure di sicurezza straordinarie, ma restano segnalazioni sulle liberta civili: informati prima di partire", plug: "Tipo A/B, 115V", tipping: "10%", emergency: "911", extra: "E diventato noto per aver adottato il bitcoin come valuta legale nel 2021.", food: "Pupusas (focaccine ripiene di formaggio)", riskLevel: "cautela" },
+  { name: "Nicaragua", enName: "Nicaragua", flag: "🇳🇮", continent: "americhe", capital: "Managua", currency: "Cordoba (NIO)", language: "Spagnolo", bestTime: "Nov-Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Generalmente sicuro per i turisti, cautela per il clima politico interno repressivo", plug: "Tipo A/B, 120V", tipping: "10%", emergency: "911", extra: "Ha oltre 19 vulcani attivi o potenzialmente attivi sul suo territorio.", food: "Gallo pinto e vigoron", riskLevel: "cautela" },
+  { name: "Belize", enName: "Belize", flag: "🇧🇿", continent: "americhe", capital: "Belmopan", currency: "Dollaro del Belize (BZD)", language: "Inglese", bestTime: "Nov-Apr (stagione secca)", visa: "Nessun visto fino a 30 giorni", safety: "Generalmente sicuro nelle zone turistiche costiere", plug: "Tipo A/B, 110V", tipping: "10%", emergency: "911", extra: "La barriera corallina del Belize e la seconda piu grande al mondo dopo quella australiana.", food: "Rice and beans con pollo stufato", riskLevel: "cautela" },
+  { name: "Giamaica", enName: "Jamaica", flag: "🇯🇲", continent: "americhe", capital: "Kingston", currency: "Dollaro giamaicano (JMD)", language: "Inglese", bestTime: "Dic-Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Sicura nei resort e zone turistiche, cautela a Kingston e nelle aree periferiche", plug: "Tipo A/B, 110V", tipping: "10-15%", emergency: "119 (polizia)", extra: "E la patria del reggae e di Bob Marley.", food: "Jerk chicken", riskLevel: "cautela" },
+  { name: "Bahamas", enName: "Bahamas", flag: "🇧🇸", continent: "americhe", capital: "Nassau", currency: "Dollaro delle Bahamas (BSD)", language: "Inglese", bestTime: "Dic-Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Sicure nelle zone turistiche principali", plug: "Tipo A/B, 120V", tipping: "15%", emergency: "911", extra: "E composta da oltre 700 isole, ma solo circa 30 sono abitate.", food: "Conch (lumache di mare) fritto", riskLevel: "sicuro" },
+  { name: "Trinidad e Tobago", enName: "Trinidad and Tobago", flag: "🇹🇹", continent: "americhe", capital: "Port of Spain", currency: "Dollaro di Trinidad e Tobago (TTD)", language: "Inglese", bestTime: "Gen-Mag (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Generalmente sicuro nelle zone turistiche, cautela a Port of Spain di notte", plug: "Tipo A/B, 115V", tipping: "10%", emergency: "999 (polizia)", extra: "Ospita uno dei Carnevale piu famosi dei Caraibi, rivale di quello brasiliano.", food: "Doubles (pane fritto con ceci speziati)", riskLevel: "cautela" },
+  { name: "Barbados", enName: "Barbados", flag: "🇧🇧", continent: "americhe", capital: "Bridgetown", currency: "Dollaro delle Barbados (BBD)", language: "Inglese", bestTime: "Dic-Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Molto sicura, tra le mete piu tranquille dei Caraibi", plug: "Tipo A/B, 115V", tipping: "10%", emergency: "211 (polizia)", extra: "Rihanna e originaria di Barbados e l'isola le ha dedicato una via.", food: "Cou-cou e pesce volante", riskLevel: "sicuro" },
+  { name: "Haiti", enName: "Haiti", flag: "🇭🇹", continent: "americhe", capital: "Port-au-Prince", currency: "Gourde (HTG)", language: "Francese, creolo haitiano", bestTime: "Non consigliato in questo momento", visa: "Non applicabile: sconsigliato ogni viaggio", safety: "Collasso dell'ordine pubblico con bande armate che controllano gran parte della capitale: sconsigliato qualsiasi viaggio non essenziale", plug: "Tipo A/B, 110V", tipping: "-", emergency: "-", extra: "Fu la prima repubblica indipendente guidata da ex schiavi, nel 1804.", food: "Riz djon djon (riso con funghi neri)", riskLevel: "conflitto" },
+  { name: "Suriname", enName: "Suriname", flag: "🇸🇷", continent: "americhe", capital: "Paramaribo", currency: "Dollaro del Suriname (SRD)", language: "Olandese", bestTime: "Ago-Nov (stagione secca)", visa: "e-visa disponibile", safety: "Generalmente sicuro", plug: "Tipo C/F, 127V", tipping: "10%", emergency: "115 (polizia)", extra: "E uno dei paesi piu forestati al mondo, oltre il 90% del territorio.", food: "Pom (sformato di pollo e radici)", riskLevel: "sicuro" },
+  { name: "Guyana", enName: "Guyana", flag: "🇬🇾", continent: "americhe", capital: "Georgetown", currency: "Dollaro della Guyana (GYD)", language: "Inglese", bestTime: "Ago-Nov, Feb-Apr (stagioni piu secche)", visa: "Nessun visto fino a 90 giorni", safety: "Generalmente sicura nelle zone turistiche, cautela a Georgetown di notte", plug: "Tipo A/B/D/G, 120V", tipping: "10%", emergency: "911", extra: "Le cascate Kaieteur sono tra le piu alte al mondo per portata d'acqua continua.", food: "Pepperpot (stufato di carne)", riskLevel: "cautela" },
+
+  { name: "Papua Nuova Guinea", enName: "Papua New Guinea", flag: "🇵🇬", continent: "oceania", capital: "Port Moresby", currency: "Kina (PGK)", language: "Inglese, tok pisin", bestTime: "Mag-Ott (stagione secca)", visa: "Visto all'arrivo disponibile", safety: "Tra i paesi con più alta criminalita della regione, soprattutto a Port Moresby: informati sull'area specifica, evita spostamenti notturni", plug: "Tipo I, 240V", tipping: "Non prevista", emergency: "000 (polizia)", extra: "Ha oltre 800 lingue parlate, la maggior densita linguistica al mondo.", food: "Mumu (carne e verdure cotte su pietre calde)", riskLevel: "cautela" },
+  { name: "Tonga", enName: "Tonga", flag: "🇹🇴", continent: "oceania", capital: "Nuku'alofa", currency: "Pa'anga (TOP)", language: "Tongano, inglese", bestTime: "Mag-Ott (stagione secca)", visa: "Nessun visto fino a 31 giorni", safety: "Sicura", plug: "Tipo I, 240V", tipping: "Non prevista", emergency: "922 (polizia)", extra: "E l'unico regno del Pacifico che non e mai stato colonizzato formalmente.", food: "Lu pulu (carne in foglie di taro con cocco)", riskLevel: "sicuro" },
+  { name: "Kiribati", enName: "Kiribati", flag: "🇰🇮", continent: "oceania", capital: "Tarawa Sud", currency: "Dollaro australiano (AUD)", language: "Gilbertese, inglese", bestTime: "Mag-Ott (stagione secca)", visa: "Nessun visto fino a 30 giorni", safety: "Sicura, collegamenti aerei molto limitati", plug: "Tipo I, 240V", tipping: "Non prevista", emergency: "292 (polizia)", extra: "E il primo paese al mondo a vedere l'alba di ogni nuovo giorno per la linea del cambio data.", food: "Pesce crudo marinato al cocco", riskLevel: "sicuro" },
+  { name: "Isole Salomone", enName: "Solomon Islands", flag: "🇸🇧", continent: "oceania", capital: "Honiara", currency: "Dollaro delle Salomone (SBD)", language: "Inglese", bestTime: "Giu-Ott (stagione secca)", visa: "Visto all'arrivo disponibile", safety: "Generalmente sicure, cautela nelle aree periferiche di Honiara", plug: "Tipo G, 220V", tipping: "Non prevista", emergency: "999 (polizia)", extra: "Ospitano alcuni dei relitti di navi e aerei della Seconda Guerra Mondiale piu intatti al mondo, oggi meta diving.", food: "Riso con pesce e frutto del pane", riskLevel: "cautela" },
+  { name: "Palau", enName: "Palau", flag: "🇵🇼", continent: "oceania", capital: "Ngerulmud", currency: "Dollaro USA (USD)", language: "Palauano, inglese", bestTime: "Nov-Apr (stagione secca)", visa: "Nessun visto fino a 30 giorni", safety: "Molto sicuro", plug: "Tipo A/B, 120V", tipping: "10%", emergency: "911", extra: "Il suo Jellyfish Lake permette di nuotare tra meduse senza pungiglione.", food: "Pesce crudo con frutto del pane", riskLevel: "sicuro" },
+  { name: "Micronesia", enName: "Federated States of Micronesia", flag: "🇫🇲", continent: "oceania", capital: "Palikir", currency: "Dollaro USA (USD)", language: "Inglese e lingue locali", bestTime: "Dic-Apr (stagione piu secca)", visa: "Nessun visto fino a 30 giorni", safety: "Sicura", plug: "Tipo A/B, 120V", tipping: "Non prevista", emergency: "320 (polizia)", extra: "Ospita le misteriose rovine di Nan Madol, una città costruita su canali artificiali.", food: "Pesce con frutto del pane e taro", riskLevel: "sicuro" },
+  { name: "Nuova Caledonia", enName: "New Caledonia", flag: "🇳🇨", continent: "oceania", capital: "Noumea", currency: "Franco CFP (XPF)", language: "Francese", bestTime: "Mag-Ott (stagione secca)", visa: "Nessun visto fino a 90 giorni (regole UE)", safety: "Generalmente sicura, tensioni politiche indipendentiste locali sporadiche: informati prima di partire", plug: "Tipo C/E, 220V", tipping: "Non prevista", emergency: "17 (polizia)", extra: "La sua laguna e una delle piu grandi al mondo, patrimonio Unesco.", food: "Bougna (carne e verdure cotte in foglie di banano)", riskLevel: "cautela" },
+  { name: "Kosovo", enName: "Kosovo", flag: "🇽🇰", continent: "europa", capital: "Pristina", currency: "Euro (EUR, non UE)", language: "Albanese, serbo", bestTime: "Mag-Set", visa: "Nessun visto fino a 90 giorni", safety: "Generalmente sicuro, tensioni sporadiche nel nord al confine con la Serbia", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "E uno degli stati piu giovani d'Europa, indipendente dal 2008.", food: "Flija (sfoglie sottili a strati)", riskLevel: "cautela" },
+  { name: "Andorra", enName: "Andorra", flag: "🇦🇩", continent: "europa", capital: "Andorra la Vella", currency: "Euro (EUR, non UE)", language: "Catalano", bestTime: "Dic-Mar (neve), Giu-Set (estate)", visa: "Nessun visto (area Schengen di fatto)", safety: "Molto sicura", plug: "Tipo C/F, 230V", tipping: "Non necessaria", emergency: "112", extra: "Non ha un aeroporto proprio: si arriva da Barcellona o Tolosa.", food: "Trinxat (patate e cavolo schiacciati)", riskLevel: "sicuro" },
+  { name: "Liechtenstein", enName: "Liechtenstein", flag: "🇱🇮", continent: "europa", capital: "Vaduz", currency: "Franco svizzero (CHF)", language: "Tedesco", bestTime: "Giu-Set", visa: "Nessun visto (Schengen)", safety: "Molto sicuro", plug: "Tipo J, 230V", tipping: "Non necessaria", emergency: "112", extra: "E il sesto stato piu piccolo al mondo, tra Svizzera e Austria.", food: "Kasknopfle (gnocchetti al formaggio)", riskLevel: "sicuro" },
+  { name: "Vaticano", enName: "Vatican City", flag: "🇻🇦", continent: "europa", capital: "Citta del Vaticano", currency: "Euro (EUR, non UE)", language: "Italiano, latino", bestTime: "Apr-Giu, Set-Ott", visa: "Nessun visto (enclave in Italia)", safety: "Molto sicuro", plug: "Tipo C/F/L, 230V", tipping: "Non necessaria", emergency: "112", extra: "E lo stato indipendente piu piccolo al mondo per superficie e popolazione.", food: "Cucina romana nei dintorni", riskLevel: "sicuro" },
+
+  { name: "Kirghizistan", enName: "Kyrgyzstan", flag: "🇰🇬", continent: "asia", capital: "Bishkek", currency: "Som kirghiso (KGS)", language: "Kirghiso, russo", bestTime: "Mag-Set", visa: "Nessun visto fino a 60 giorni", safety: "Sicuro", plug: "Tipo C/F, 220V", tipping: "10%", emergency: "102 (polizia)", extra: "Le montagne del Tian Shan occupano oltre il 90% del territorio.", food: "Beshbarmak e kumis (latte di giumenta fermentato)", riskLevel: "sicuro" },
+  { name: "Tagikistan", enName: "Tajikistan", flag: "🇹🇯", continent: "asia", capital: "Dushanbe", currency: "Somoni (TJS)", language: "Tagico", bestTime: "Mag-Set", visa: "e-visa disponibile", safety: "Generalmente sicuro, cautela lungo il confine afghano", plug: "Tipo C/F, 220V", tipping: "10%", emergency: "112", extra: "Il Pamir Highway e una delle strade di montagna piu spettacolari al mondo.", food: "Osh (plov tagico)", riskLevel: "cautela" },
+  { name: "Turkmenistan", enName: "Turkmenistan", flag: "🇹🇲", continent: "asia", capital: "Ashgabat", currency: "Manat turkmeno (TMT)", language: "Turkmeno", bestTime: "Mar-Mag, Set-Nov", visa: "Visto necessario, spesso solo con tour organizzato", safety: "Regime molto controllato, movimenti dei turisti spesso monitorati", plug: "Tipo C/F, 220V", tipping: "10%", emergency: "112", extra: "Il cratere di Darvaza, chiamato 'porta dell'inferno', brucia gas naturale da decenni.", food: "Plov turkmeno", riskLevel: "cautela" },
+
+  { name: "Ciad", enName: "Chad", flag: "🇹🇩", continent: "africa", capital: "N'Djamena", currency: "Franco CFA (XAF)", language: "Francese, arabo", bestTime: "Nov-Feb (stagione secca)", visa: "Visto necessario in anticipo", safety: "Cautela per instabilita regionale legata alla crisi del Sahel e ai confini con Sudan e Libia", plug: "Tipo C/D/E, 220V", tipping: "10%", emergency: "17 (polizia)", extra: "Il lago Ciad, un tempo tra i piu grandi d'Africa, si e ridotto drasticamente negli ultimi decenni.", food: "Riso con salsa di arachidi", riskLevel: "cautela" },
+  { name: "Gibuti", enName: "Djibouti", flag: "🇩🇯", continent: "africa", capital: "Gibuti", currency: "Franco di Gibuti (DJF)", language: "Francese, arabo", bestTime: "Nov-Mar (clima piu mite)", visa: "Visto all'arrivo disponibile", safety: "Generalmente sicuro, base strategica per diverse missioni militari internazionali", plug: "Tipo C/E, 220V", tipping: "10%", emergency: "17 (polizia)", extra: "Il lago Assal e uno dei punti piu bassi e salati d'Africa.", food: "Riso con pesce speziato", riskLevel: "cautela" },
+  { name: "Eritrea", enName: "Eritrea", flag: "🇪🇷", continent: "africa", capital: "Asmara", currency: "Nakfa (ERN)", language: "Tigrino, arabo", bestTime: "Dic-Feb (clima piu mite)", visa: "Visto necessario in anticipo, difficile da ottenere", safety: "Regime molto chiuso e controllato, accesso turistico limitato", plug: "Tipo C/L, 230V", tipping: "10%", emergency: "113 (polizia)", extra: "Asmara conserva una delle collezioni di architettura Art Deco meglio preservate al mondo.", food: "Injera con zighini (stufato speziato)", riskLevel: "cautela" },
+  { name: "Guinea", enName: "Guinea", flag: "🇬🇳", continent: "africa", capital: "Conakry", currency: "Franco guineano (GNF)", language: "Francese", bestTime: "Nov-Apr (stagione secca)", visa: "Visto necessario in anticipo", safety: "Cautela per instabilita politica interna, informati prima di partire", plug: "Tipo C/F/K, 220V", tipping: "10%", emergency: "122 (polizia)", extra: "Ospita alcune delle cascate piu belle e meno visitate dell'Africa occidentale.", food: "Riso con salsa di arachidi e pesce", riskLevel: "cautela" },
+  { name: "Guinea-Bissau", enName: "Guinea-Bissau", flag: "🇬🇼", continent: "africa", capital: "Bissau", currency: "Franco CFA (XOF)", language: "Portoghese", bestTime: "Dic-Mag (stagione secca)", visa: "Visto necessario in anticipo", safety: "Generalmente sicura, instabilita politica ricorrente da monitorare", plug: "Tipo C, 220V", tipping: "10%", emergency: "117 (polizia)", extra: "L'arcipelago delle Bijagos e una riserva Unesco quasi incontaminata.", food: "Jollof di riso con pesce", riskLevel: "cautela" },
+  { name: "Sierra Leone", enName: "Sierra Leone", flag: "🇸🇱", continent: "africa", capital: "Freetown", currency: "Leone (SLE)", language: "Inglese", bestTime: "Nov-Apr (stagione secca)", visa: "Visto necessario in anticipo", safety: "Generalmente sicura nelle principali città", plug: "Tipo D/G, 230V", tipping: "10%", emergency: "999 (polizia)", extra: "Le sue spiagge sono tra le meno affollate e piu belle dell'Africa occidentale.", food: "Riso con salsa di foglie di patata dolce", riskLevel: "cautela" },
+  { name: "Liberia", enName: "Liberia", flag: "🇱🇷", continent: "africa", capital: "Monrovia", currency: "Dollaro liberiano (LRD)", language: "Inglese", bestTime: "Nov-Apr (stagione secca)", visa: "Visto necessario in anticipo", safety: "Generalmente sicura, infrastrutture ancora limitate dopo la guerra civile", plug: "Tipo A/B/C, 120V", tipping: "10%", emergency: "911", extra: "Fu fondata nel XIX secolo da ex schiavi afroamericani liberati.", food: "Riso con salsa di foglie di patata dolce", riskLevel: "cautela" },
+  { name: "Togo", enName: "Togo", flag: "🇹🇬", continent: "africa", capital: "Lome", currency: "Franco CFA (XOF)", language: "Francese", bestTime: "Nov-Mar (stagione secca)", visa: "Visto all'arrivo disponibile", safety: "Generalmente sicuro", plug: "Tipo C, 220V", tipping: "10%", emergency: "117 (polizia)", extra: "I villaggi Tata Somba nel nord hanno architetture uniche a forma di castello.", food: "Riso con salsa di arachidi e pesce", riskLevel: "cautela" },
+  { name: "Benin", enName: "Benin", flag: "🇧🇯", continent: "africa", capital: "Porto Novo", currency: "Franco CFA (XOF)", language: "Francese", bestTime: "Nov-Feb (stagione secca)", visa: "Visto all'arrivo disponibile", safety: "Generalmente sicuro, cautela nelle aree di confine nord", plug: "Tipo C/E, 220V", tipping: "10%", emergency: "117 (polizia)", extra: "E considerato la culla del vudu, praticato ancora oggi in forma tradizionale.", food: "Riso con salsa di arachidi e pesce", riskLevel: "cautela" },
+  { name: "Mauritania", enName: "Mauritania", flag: "🇲🇷", continent: "africa", capital: "Nouakchott", currency: "Ouguiya (MRU)", language: "Arabo, francese", bestTime: "Nov-Feb (clima piu mite)", visa: "e-visa disponibile", safety: "Cautela per rischio terrorismo in alcune aree, informati prima di partire", plug: "Tipo C, 220V", tipping: "10%", emergency: "17 (polizia)", extra: "Il deserto ospita la storica citta carovaniera di Chinguetti, patrimonio Unesco.", food: "Couscous con carne e datteri", riskLevel: "cautela" },
+  { name: "Gambia", enName: "Gambia", flag: "🇬🇲", continent: "africa", capital: "Banjul", currency: "Dalasi (GMD)", language: "Inglese", bestTime: "Nov-Mag (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Generalmente sicura, tra le mete piu stabili dell'Africa occidentale", plug: "Tipo G, 230V", tipping: "10%", emergency: "117 (polizia)", extra: "E il paese piu piccolo dell'Africa continentale, quasi interamente lungo il fiume Gambia.", food: "Domoda (stufato di arachidi)", riskLevel: "cautela" },
+  { name: "São Tomé e Príncipe", enName: "Sao Tome and Principe", flag: "🇸🇹", continent: "africa", capital: "São Tomé", currency: "Dobra (STN)", language: "Portoghese", bestTime: "Giu-Set (stagione secca)", visa: "Visto all'arrivo disponibile", safety: "Molto sicuro, tra le mete piu tranquille dell'Africa", plug: "Tipo C/F, 230V", tipping: "10%", emergency: "112", extra: "E tra le mete di ecoturismo meno conosciute al mondo, quasi priva di turismo di massa.", food: "Calulu (stufato di pesce e verdure)", riskLevel: "sicuro" },
+  { name: "Guinea Equatoriale", enName: "Equatorial Guinea", flag: "🇬🇶", continent: "africa", capital: "Malabo", currency: "Franco CFA (XAF)", language: "Spagnolo, francese", bestTime: "Dic-Mar (stagione secca)", visa: "Visto necessario in anticipo", safety: "Generalmente sicura nelle principali città, forte controllo governativo", plug: "Tipo C/E, 220V", tipping: "10%", emergency: "112", extra: "E l'unico paese africano con lo spagnolo come lingua ufficiale.", food: "Pepe soup e riso con pesce", riskLevel: "cautela" },
+  { name: "Lesotho", enName: "Lesotho", flag: "🇱🇸", continent: "africa", capital: "Maseru", currency: "Loti (LSL)", language: "Sesotho, inglese", bestTime: "Mag-Set (inverno secco)", visa: "Nessun visto fino a 90 giorni", safety: "Generalmente sicuro, criminalita comune in alcune aree urbane", plug: "Tipo M, 220V", tipping: "10%", emergency: "123 (polizia)", extra: "E l'unico paese al mondo interamente sopra i 1.000 metri di altitudine.", food: "Papa con moroho (verdure)", riskLevel: "cautela" },
+  { name: "Comore", enName: "Comoros", flag: "🇰🇲", continent: "africa", capital: "Moroni", currency: "Franco comoriano (KMF)", language: "Comoriano, francese, arabo", bestTime: "Mag-Nov (stagione secca)", visa: "Visto all'arrivo disponibile", safety: "Generalmente sicure", plug: "Tipo C/E, 220V", tipping: "10%", emergency: "17 (polizia)", extra: "Sono chiamate 'isole della luna' e ospitano un vulcano ancora attivo, il Karthala.", food: "Riso con pesce e latte di cocco", riskLevel: "sicuro" },
+
+  { name: "Antigua e Barbuda", enName: "Antigua and Barbuda", flag: "🇦🇬", continent: "americhe", capital: "Saint John's", currency: "Dollaro dei Caraibi orientali (XCD)", language: "Inglese", bestTime: "Dic-Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Molto sicura", plug: "Tipo A/B, 230V", tipping: "10%", emergency: "911", extra: "Ha 365 spiagge, una per ogni giorno dell'anno secondo la leggenda locale.", food: "Fungee e pesce salato", riskLevel: "sicuro" },
+  { name: "Dominica", enName: "Dominica", flag: "🇩🇲", continent: "americhe", capital: "Roseau", currency: "Dollaro dei Caraibi orientali (XCD)", language: "Inglese", bestTime: "Dic-Giu (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Molto sicura", plug: "Tipo D/G, 230V", tipping: "10%", emergency: "999", extra: "E chiamata 'l'isola natura' dei Caraibi per le sue foreste pluviali quasi intatte.", food: "Callaloo (zuppa di verdure)", riskLevel: "sicuro" },
+  { name: "Grenada", enName: "Grenada", flag: "🇬🇩", continent: "americhe", capital: "Saint George's", currency: "Dollaro dei Caraibi orientali (XCD)", language: "Inglese", bestTime: "Gen-Mag (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Molto sicura", plug: "Tipo G, 230V", tipping: "10%", emergency: "911", extra: "E conosciuta come 'l'isola delle spezie' per le sue piantagioni di noce moscata.", food: "Oil down (stufato con frutto del pane)", riskLevel: "sicuro" },
+  { name: "Saint Kitts e Nevis", enName: "Saint Kitts and Nevis", flag: "🇰🇳", continent: "americhe", capital: "Basseterre", currency: "Dollaro dei Caraibi orientali (XCD)", language: "Inglese", bestTime: "Dic-Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Molto sicura", plug: "Tipo D/G, 230V", tipping: "10%", emergency: "911", extra: "E il piu piccolo stato sovrano delle Americhe per superficie e popolazione.", food: "Stewed saltfish con dumpling", riskLevel: "sicuro" },
+  { name: "Saint Lucia", enName: "Saint Lucia", flag: "🇱🇨", continent: "americhe", capital: "Castries", currency: "Dollaro dei Caraibi orientali (XCD)", language: "Inglese", bestTime: "Dic-Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Molto sicura", plug: "Tipo G, 240V", tipping: "10%", emergency: "911", extra: "I Pitons, due picchi vulcanici gemelli, sono patrimonio Unesco.", food: "Green fig and saltfish", riskLevel: "sicuro" },
+  { name: "Saint Vincent e Grenadine", enName: "Saint Vincent and the Grenadines", flag: "🇻🇨", continent: "americhe", capital: "Kingstown", currency: "Dollaro dei Caraibi orientali (XCD)", language: "Inglese", bestTime: "Dic-Apr (stagione secca)", visa: "Nessun visto fino a 90 giorni", safety: "Molto sicura", plug: "Tipo A/B/G, 230V", tipping: "10%", emergency: "911", extra: "Alcune scene dei Pirati dei Caraibi sono state girate tra le sue isole.", food: "Roti e callaloo", riskLevel: "sicuro" },
+
+  { name: "Nauru", enName: "Nauru", flag: "🇳🇷", continent: "oceania", capital: "Yaren", currency: "Dollaro australiano (AUD)", language: "Nauruano, inglese", bestTime: "Mag-Ott (stagione piu secca)", visa: "Visto necessario in anticipo", safety: "Sicura, collegamenti aerei molto limitati", plug: "Tipo I, 240V", tipping: "Non prevista", emergency: "110 (polizia)", extra: "E la repubblica piu piccola al mondo per popolazione dopo la Città del Vaticano.", food: "Pesce con frutto del pane", riskLevel: "sicuro" },
+  { name: "Isole Marshall", enName: "Marshall Islands", flag: "🇲🇭", continent: "oceania", capital: "Majuro", currency: "Dollaro USA (USD)", language: "Marshallese, inglese", bestTime: "Dic-Apr (stagione piu secca)", visa: "Nessun visto fino a 30 giorni", safety: "Sicure", plug: "Tipo A/B, 120V", tipping: "Non prevista", emergency: "911", extra: "L'atollo di Bikini, oggi disabitato, fu sede di test nucleari nel dopoguerra.", food: "Pesce con frutto del pane e taro", riskLevel: "sicuro" },
+  { name: "Tuvalu", enName: "Tuvalu", flag: "🇹🇻", continent: "oceania", capital: "Funafuti", currency: "Dollaro australiano (AUD)", language: "Tuvaluano, inglese", bestTime: "Mag-Ott (stagione piu secca)", visa: "Nessun visto fino a 30 giorni", safety: "Sicura, tra i paesi più a rischio al mondo per l'innalzamento del livello del mare", plug: "Tipo G/I, 230V", tipping: "Non prevista", emergency: "911", extra: "E tra gli stati sovrani piu piccoli e meno visitati del pianeta.", food: "Pesce crudo con cocco", riskLevel: "sicuro" },
+];
+
+const CONTINENT_COLORS = {
+  europa: "#3F7268",
+  asia: "#C9973E",
+  africa: "#A6462F",
+  americhe: "#5B6EA6",
+  oceania: "#7A8B4A",
+};
+
+const REGIONS_BY_COUNTRY = {
+  Italia: [
+    { name: "Valle d'Aosta", description: "La regione più piccola d'Italia, dominata dal Monte Bianco e dal turismo alpino ad Aosta e Courmayeur." },
+    { name: "Piemonte", description: "Torino come capitale, colline del Barolo, risotti e tartufo bianco di Alba." },
+    { name: "Liguria", description: "La costa delle Cinque Terre, Genova e Portofino, patria del pesto." },
+    { name: "Lombardia", description: "Milano come motore economico, i laghi (Como, Garda) e la Certosa di Pavia." },
+    { name: "Trentino-Alto Adige", description: "Dolomiti, laghi alpini e una forte identità bilingue italiano-tedesca." },
+    { name: "Veneto", description: "Venezia, Verona e il Prosecco delle colline trevigiane." },
+    { name: "Friuli-Venezia Giulia", description: "Trieste, confine con Slovenia e Austria, vini bianchi rinomati." },
+    { name: "Emilia-Romagna", description: "Bologna, Parma e Modena: la patria di pasta fresca, Parmigiano e aceto balsamico." },
+    { name: "Toscana", description: "Firenze, le colline del Chianti, Siena e Pisa." },
+    { name: "Umbria", description: "Perugia e Assisi, borghi medievali nel cuore verde d'Italia." },
+    { name: "Marche", description: "Ancona, spiagge adriatiche e borghi come Urbino." },
+    { name: "Lazio", description: "Roma, la capitale, e le coste di Sabaudia e Sperlonga." },
+    { name: "Abruzzo", description: "Il Gran Sasso e la Majella, tra le montagne più selvagge del centro Italia." },
+    { name: "Molise", description: "Una delle regioni meno turistiche, tra borghi collinari e la costa adriatica." },
+    { name: "Campania", description: "Napoli, la costiera amalfitana, Pompei ed Ercolano." },
+    { name: "Puglia", description: "Bari, i trulli di Alberobello e le spiagge del Salento." },
+    { name: "Basilicata", description: "I Sassi di Matera, patrimonio Unesco, e coste ancora poco affollate." },
+    { name: "Calabria", description: "La punta dello stivale, tra Tropea e l'Aspromonte." },
+    { name: "Sicilia", description: "Palermo, Taormina, l'Etna e templi greci ad Agrigento." },
+    { name: "Sardegna", description: "Cagliari, la Costa Smeralda e alcune delle spiagge più belle del Mediterraneo." },
+  ],
+  Francia: [
+    { name: "Île-de-France", description: "Parigi e la sua area metropolitana, cuore politico ed economico del paese." },
+    { name: "Provenza-Alpi-Costa Azzurra", description: "Marsiglia, Nizza, Cannes e i campi di lavanda della Provenza." },
+    { name: "Alvernia-Rodano-Alpi", description: "Lione, le Alpi francesi e le stazioni sciistiche come Chamonix." },
+    { name: "Nuova Aquitania", description: "Bordeaux e i suoi vigneti, più le dune di Arcachon." },
+    { name: "Occitania", description: "Tolosa, Montpellier e i paesaggi cathari dei Pirenei." },
+    { name: "Grand Est", description: "Strasburgo e l'Alsazia, con forte influenza tedesca nell'architettura." },
+    { name: "Alta Francia", description: "Lille e la regione minerarià al confine con Belgio." },
+    { name: "Normandia", description: "Le spiagge dello sbarco del D-Day e il Monte Saint-Michel." },
+    { name: "Bretagna", description: "Coste selvagge, cultura celtica e la città murata di Saint-Malo." },
+    { name: "Paesi della Loira", description: "Nantes e i castelli rinascimentali della Valle della Loira." },
+    { name: "Centro-Valle della Loira", description: "Tours e i castelli di Chambord e Chenonceau." },
+    { name: "Borgogna-Franca Contea", description: "Dijon, vigneti pregiati e il patrimonio gastronomico borgognone." },
+    { name: "Corsica", description: "Isola montuosa nel Mediterraneo, tra Ajaccio e coste incontaminate." },
+  ],
+  Spagna: [
+    { name: "Andalusia", description: "Sevilla, Granada e l'Alhambra, cuore del flamenco." },
+    { name: "Catalogna", description: "Barcellona, le opere di Gaudí e la Costa Brava." },
+    { name: "Comunità di Madrid", description: "La capitale spagnola, museo del Prado e vita notturna intensa." },
+    { name: "Comunità Valenzana", description: "Valencia, la paella e le spiagge di Alicante." },
+    { name: "Galizia", description: "Santiago de Compostela e le coste atlantiche selvagge." },
+    { name: "Paese Basco", description: "Bilbao, San Sebastián e una cucina tra le più celebrate di Spagna." },
+    { name: "Castiglia e León", description: "Salamanca, Segovia e Ávila, città patrimonio Unesco." },
+    { name: "Castiglia-La Mancia", description: "Toledo e i paesaggi legati a Don Chisciotte." },
+    { name: "Isole Canarie", description: "Arcipelago vulcanico atlantico con clima mite tutto l'anno." },
+    { name: "Isole Baleari", description: "Mallorca, Ibiza e Minorca, tra le mete costiere più famose d'Europa." },
+    { name: "Aragona", description: "Saragozza e i Pirenei aragonesi." },
+    { name: "Estremadura", description: "Una delle regioni meno turistiche, con città storiche come Cáceres." },
+    { name: "Murcia", description: "Coste mediterranee e agricoltura intensiva." },
+    { name: "Asturie", description: "Montagne verdi, sidro e coste atlantiche." },
+    { name: "Cantabria", description: "Santander e le grotte preistoriche di Altamira." },
+    { name: "Navarra", description: "Pamplona, famosa per la corsa dei tori di San Firmino." },
+    { name: "La Rioja", description: "La regione vinicola più celebre di Spagna." },
+  ],
+  "Stati Uniti": [
+    { name: "California", description: "Los Angeles, San Francisco, Silicon Valley e i parchi nazionali della Sierra Nevada." },
+    { name: "New York", description: "La città di New York e le Cascate del Niagara." },
+    { name: "Florida", description: "Miami, Orlando e i suoi parchi a tema, spiagge tropicali." },
+    { name: "Texas", description: "Houston, Austin e Dallas, tra petrolio, musica e barbecue." },
+    { name: "Nevada", description: "Las Vegas e il Grand Canyon vicino al confine." },
+    { name: "Arizona", description: "Il Grand Canyon e i paesaggi desertici di Sedona." },
+    { name: "Illinois", description: "Chicago, i suoi grattacieli sul lago Michigan." },
+    { name: "Massachusetts", description: "Boston, storia coloniale e università prestigiose." },
+    { name: "Washington", description: "Seattle e i paesaggi montuosi del nord-ovest." },
+    { name: "Colorado", description: "Denver e le Montagne Rocciose, meta sci d'inverno." },
+    { name: "Hawaii", description: "Arcipelago vulcanico nel Pacifico, spiagge e vulcani attivi." },
+    { name: "Alaska", description: "Wilderness estrema, ghiacciai e fauna selvatica." },
+    { name: "Louisiana", description: "New Orleans, jazz e cultura creola." },
+    { name: "Georgia", description: "Atlanta, motore economico del sud-est." },
+    { name: "Utah", description: "Parchi nazionali spettacolari come Zion e Bryce Canyon." },
+    { name: "Oregon", description: "Portland e coste selvagge del Pacifico." },
+    { name: "Pennsylvania", description: "Philadelphia, storia della fondazione degli USA." },
+    { name: "Virginia", description: "Storia coloniale e la capitale Richmond." },
+    { name: "North Carolina", description: "Montagne Blue Ridge e coste atlantiche." },
+    { name: "South Carolina", description: "Charleston, città storica sul Sud Atlantico." },
+    { name: "Tennessee", description: "Nashville, capitale della musica country." },
+    { name: "Michigan", description: "Detroit e i Grandi Laghi." },
+    { name: "Ohio", description: "Cleveland e Columbus, cuore industriale del Midwest." },
+    { name: "New Jersey", description: "Coste atlantiche e vicinanza a New York City." },
+    { name: "Missouri", description: "Saint Louis e Kansas City." },
+    { name: "Wisconsin", description: "Milwaukee e paesaggi rurali dei Grandi Laghi." },
+    { name: "Minnesota", description: "Minneapolis e migliaia di laghi." },
+    { name: "Maryland", description: "Baltimora e vicinanza a Washington D.C." },
+    { name: "Indiana", description: "Indianapolis, sede della famosa corsa automobilistica Indy 500." },
+    { name: "Kentucky", description: "Patria del bourbon e del derby di Louisville." },
+    { name: "Oklahoma", description: "Pianure centrali e cultura dei nativi americani." },
+    { name: "Connecticut", description: "Piccolo stato nel New England, vicino a New York." },
+    { name: "Iowa", description: "Pianure agricole del Midwest." },
+    { name: "Mississippi", description: "Culla del blues lungo il fiume Mississippi." },
+    { name: "Arkansas", description: "Montagne Ozark e paesaggi rurali." },
+    { name: "Kansas", description: "Grandi pianure agricole centrali." },
+    { name: "Utah", description: "(vedi sopra)" },
+    { name: "Nebraska", description: "Pianure centrali, poco turistiche ma vaste." },
+    { name: "New Mexico", description: "Santa Fe e paesaggi desertici con forte cultura nativa e ispanica." },
+    { name: "West Virginia", description: "Montagne Appalachi, escursionismo." },
+    { name: "Idaho", description: "Montagne e vaste zone rurali nel nord-ovest." },
+    { name: "New Hampshire", description: "Montagne del New England e foliage autunnale." },
+    { name: "Maine", description: "Coste rocciose e aragoste nel New England." },
+    { name: "Montana", description: "Grandi spazi selvaggi e il parco di Glacier." },
+    { name: "Rhode Island", description: "Il più piccolo stato USA, coste storiche di Newport." },
+    { name: "Delaware", description: "Piccolo stato costiero vicino a Philadelphia." },
+    { name: "South Dakota", description: "Il monumento del Monte Rushmore." },
+    { name: "North Dakota", description: "Pianure rurali nel nord centrale." },
+    { name: "Alabama", description: "Storia del movimento per i diritti civili a Montgomery e Birmingham." },
+    { name: "Vermont", description: "Colline verdi, sciroppo d'acero e foliage autunnale." },
+    { name: "Wyoming", description: "Il parco di Yellowstone e ampi spazi selvaggi." },
+  ],
+  Giappone: [
+    { name: "Hokkaido", description: "L'isola più a nord, famosa per la neve, gli onsen e il granchio." },
+    { name: "Tohoku", description: "Regione rurale del nord di Honshu, tra montagne e coste selvagge." },
+    { name: "Kanto", description: "Tokyo, Yokohama e la baia più densamente popolata del Giappone." },
+    { name: "Chubu", description: "Il Monte Fuji, le Alpi giapponesi e Nagoya." },
+    { name: "Kansai", description: "Kyoto, Osaka e Nara: il cuore storico e culturale del Giappone." },
+    { name: "Chugoku", description: "Hiroshima e le coste del Mare Interno di Seto." },
+    { name: "Shikoku", description: "La più piccola delle quattro isole principali, meta di pellegrinaggi buddisti." },
+    { name: "Kyushu e Okinawa", description: "Isole subtropicali del sud, vulcani attivi e spiagge tropicali a Okinawa." },
+  ],
+  Germania: [
+    { name: "Baviera", description: "Monaco, i castelli di Neuschwanstein e le Alpi bavaresi." },
+    { name: "Berlino", description: "La capitale, storia della Guerra Fredda e vita notturna." },
+    { name: "Nord Reno-Vestfalia", description: "Colonia e Düsseldorf, la regione più popolosa della Germania." },
+    { name: "Baden-Württemberg", description: "Stoccarda e la Foresta Nera." },
+    { name: "Assia", description: "Francoforte, centro finanziario del paese." },
+    { name: "Bassa Sassonia", description: "Hannover e le coste del Mare del Nord." },
+    { name: "Saxonia", description: "Dresda e Lipsia, ricche di storia e architettura barocca." },
+    { name: "Amburgo", description: "Città-stato portuale sul fiume Elba." },
+    { name: "Renania-Palatinato", description: "Vigneti lungo il Reno e la Mosella." },
+    { name: "Schleswig-Holstein", description: "Coste tra il Mar Baltico e il Mare del Nord." },
+    { name: "Brandeburgo", description: "Circonda Berlino, con laghi e foreste." },
+    { name: "Saxonia-Anhalt", description: "Storia della Riforma protestante a Wittenberg." },
+    { name: "Turingia", description: "Foreste e città storiche come Weimar." },
+    { name: "Meclemburgo-Pomerania Anteriore", description: "Coste baltiche poco affollate e parchi naturali." },
+    { name: "Saarland", description: "Piccolo stato al confine con Francia e Lussemburgo." },
+    { name: "Brema", description: "Città-stato portuale storica sul fiume Weser." },
+  ],
+  "Regno Unito": [
+    { name: "Inghilterra", description: "Londra, Manchester, Liverpool e la maggior parte delle attrazioni turistiche del paese." },
+    { name: "Scozia", description: "Edimburgo, Glasgow, gli Highlands e i loch come Loch Ness." },
+    { name: "Galles", description: "Cardiff, castelli medievali e i parchi nazionali di Snowdonia." },
+    { name: "Irlanda del Nord", description: "Belfast e la Strada Rialzata dei Giganti (Giant's Causeway)." },
+  ],
+  Grecia: [
+    { name: "Attica", description: "Atene e la sua area metropolitana." },
+    { name: "Macedonia Centrale", description: "Salonicco, seconda città della Grecia." },
+    { name: "Creta", description: "La più grande isola greca, tra spiagge e siti minoici." },
+    { name: "Egeo Meridionale", description: "Santorini, Mykonos e le isole più fotografate della Grecia." },
+    { name: "Egeo Settentrionale", description: "Isole meno turistiche come Lesbo e Chios." },
+    { name: "Isole Ionie", description: "Corfù, Zante e Cefalonia sul mare Ionio." },
+    { name: "Peloponneso", description: "Antica Olimpia, Micene e Sparta." },
+    { name: "Grecia Centrale", description: "Delfi e il monastero sospeso di Osios Loukas." },
+    { name: "Epiro", description: "Montagne selvagge nel nord-ovest, vicino all'Albania." },
+    { name: "Tessaglia", description: "I monasteri sospesi delle Meteore." },
+    { name: "Macedonia Occidentale", description: "Regione montuosa e meno turistica del nord." },
+    { name: "Macedonia Orientale e Tracia", description: "Confine con Turchia e Bulgaria, meno visitata." },
+    { name: "Grecia Occidentale", description: "Patrasso e le coste ovest sul mare Ionio." },
+  ],
+  Portogallo: [
+    { name: "Nord", description: "Porto, il vino Porto e la Valle del Douro." },
+    { name: "Centro", description: "Coimbra e le spiagge di Aveiro." },
+    { name: "Área Metropolitana di Lisbona", description: "La capitale Lisbona e la costa di Cascais e Sintra." },
+    { name: "Alentejo", description: "Campagne, oliveti e città storiche come Évora." },
+    { name: "Algarve", description: "Le spiagge più famose del Portogallo, popolarissime d'estate." },
+    { name: "Azzorre", description: "Arcipelago vulcanico nell'Atlantico, con laghi e balene." },
+    { name: "Madeira", description: "Isola subtropicale famosa per le sue levadas e il vino Madeira." },
+  ],
+  Messico: [
+    { name: "Città del Messico (CDMX)", description: "La capitale, tra le megalopoli più grandi del mondo." },
+    { name: "Quintana Roo", description: "Cancún, Tulum e le spiagge caraibiche più famose." },
+    { name: "Jalisco", description: "Guadalajara, patria del mariachi e del tequila." },
+    { name: "Yucatán", description: "Mérida e le rovine Maya di Chichén Itzá." },
+    { name: "Oaxaca", description: "Cucina tradizionale e forte cultura indigena." },
+    { name: "Baja California Sur", description: "Los Cabos, tra deserto e Pacifico." },
+    { name: "Guanajuato", description: "Città coloniali colorate come San Miguel de Allende." },
+    { name: "Chiapas", description: "Foreste tropicali e le rovine Maya di Palenque." },
+    { name: "Veracruz", description: "Coste sul Golfo del Messico e cultura afro-messicana." },
+    { name: "Puebla", description: "Città coloniale famosa per la ceramica talavera e il mole." },
+    { name: "Nuevo León", description: "Monterrey, motore industriale del nord." },
+    { name: "Michoacán", description: "Foreste dove svernano le farfalle monarca." },
+  ],
+  Brasile: [
+    { name: "Sudeste", description: "San Paolo, Rio de Janeiro e Minas Gerais: cuore economico e turistico del Brasile." },
+    { name: "Nordeste", description: "Salvador de Bahia, Recife e le spiagge tropicali più famose." },
+    { name: "Sul", description: "Porto Alegre e le Cascate dell'Iguazú." },
+    { name: "Centro-Ovest", description: "Brasília, capitale federale, e il Pantanal." },
+    { name: "Nord", description: "La foresta amazzonica e la città di Manaus." },
+  ],
+  Thailandia: [
+    { name: "Thailandia del Nord", description: "Chiang Mai, templi tra le montagne e santuari degli elefanti." },
+    { name: "Thailandia Centrale", description: "Bangkok e le antiche rovine di Ayutthaya." },
+    { name: "Thailandia Orientale", description: "Pattaya e le isole di Koh Samet." },
+    { name: "Isaan (Nordest)", description: "Regione rurale meno turistica, confine con Laos e Cambogia." },
+    { name: "Thailandia Occidentale", description: "Kanchanaburi e il famoso Ponte sul fiume Kwai." },
+    { name: "Thailandia del Sud", description: "Phuket, Krabi e le isole del Mare delle Andamane." },
+  ],
+  Australia: [
+    { name: "Nuovo Galles del Sud", description: "Sydney e la Opera House." },
+    { name: "Victoria", description: "Melbourne e la Great Ocean Road." },
+    { name: "Queensland", description: "La Grande Barriera Corallina e Brisbane." },
+    { name: "Australia Occidentale", description: "Perth e coste remote poco popolate." },
+    { name: "Australia Meridionale", description: "Adelaide e le regioni vinicole della Barossa Valley." },
+    { name: "Tasmania", description: "Isola selvaggia a sud, natura incontaminata." },
+    { name: "Territorio del Nord", description: "Uluru e il parco nazionale di Kakadu." },
+    { name: "Territorio della Capitale Australiana", description: "Canberra, la capitale federale." },
+  ],
+  Canada: [
+    { name: "Ontario", description: "Toronto, Ottawa e le Cascate del Niagara." },
+    { name: "Quebec", description: "Montreal e Quebec City, cuore francofono del Canada." },
+    { name: "Columbia Britannica", description: "Vancouver e le Montagne Rocciose canadesi." },
+    { name: "Alberta", description: "Calgary, Banff e Jasper tra le Rocciose." },
+    { name: "Nuova Scozia", description: "Coste atlantiche e la storica Halifax." },
+    { name: "Manitoba", description: "Winnipeg, tra pianure e laghi." },
+    { name: "Saskatchewan", description: "Vaste pianure agricole centrali." },
+    { name: "New Brunswick", description: "Maree tra le più alte del mondo nella Baia di Fundy." },
+    { name: "Terranova e Labrador", description: "Coste remote e iceberg nell'Atlantico nord." },
+    { name: "Isola del Principe Edoardo", description: "La provincia più piccola, famosa per le patate e i paesaggi rurali." },
+    { name: "Yukon", description: "Territorio remoto nel nord-ovest, aurore boreali." },
+    { name: "Territori del Nordovest", description: "Vasta wilderness artica poco popolata." },
+    { name: "Nunavut", description: "Il territorio più a nord, cultura Inuit." },
+  ],
+  Marocco: [
+    { name: "Marrakech-Safi", description: "Marrakech, la medina e i souk più famosi del paese." },
+    { name: "Casablanca-Settat", description: "Casablanca, il motore economico del Marocco." },
+    { name: "Rabat-Salé-Kénitra", description: "Rabat, la capitale amministrativa." },
+    { name: "Fès-Meknès", description: "Fès, con una delle medine medievali meglio conservate al mondo." },
+    { name: "Tangeri-Tétouan-Al Hoceïma", description: "Tangeri e la costa mediterranea nel nord." },
+    { name: "Souss-Massa", description: "Agadir e le spiagge atlantiche del sud." },
+    { name: "Oriental", description: "Regione nord-orientale al confine con l'Algeria." },
+    { name: "Drâa-Tafilalet", description: "Le porte del Sahara e le kasbah di Ouarzazate." },
+    { name: "Béni Mellal-Khénifra", description: "Montagne dell'Atlante centrale." },
+    { name: "Laâyoune-Sakia El Hamra", description: "Regione desertica del Sahara Occidentale." },
+    { name: "Guelmim-Oued Noun", description: "Zona di transizione verso il Sahara." },
+    { name: "Dakhla-Oued Ed-Dahab", description: "Estremo sud atlantico, meta di kitesurf." },
+  ],
+};
+
+const CONTINENT_ORDER = ["europa", "asia", "africa", "americhe", "oceania"];
+
+// ---------------------------------------------------------------------------
+// FOTO REALI (Wikipedia REST API)
+// ---------------------------------------------------------------------------
+// Recupera in tempo reale una foto reale del paese (e qualche foto extra per la
+// galleria) dall'API pubblica di Wikipedia. Nessuna immagine è incorporata o
+// verificata a mano: se la richiesta fallisce, l'interfaccia ricade
+// sull'illustrazione a icone.
+const mediaCache = new Map();
+
+function useCountryMedia(enName) {
+  const [state, setState] = useState(() => mediaCache.get(enName) || { status: "loading", photo: null, gallery: [] });
+
+  useEffect(() => {
+    if (mediaCache.has(enName)) {
+      setState(mediaCache.get(enName));
+      return;
+    }
+    let cancelled = false;
+    setState({ status: "loading", photo: null, gallery: [] });
+
+    (async () => {
+      try {
+        const summaryRes = await fetch(
+          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(enName)}`
+        );
+        if (!summaryRes.ok) throw new Error("no summary");
+        const summary = await summaryRes.json();
+        const photo = summary?.originalimage?.source || summary?.thumbnail?.source || null;
+
+        let gallery = [];
+        try {
+          const mediaRes = await fetch(
+            `https://en.wikipedia.org/api/rest_v1/page/media-list/${encodeURIComponent(enName)}`
+          );
+          if (mediaRes.ok) {
+            const media = await mediaRes.json();
+            gallery = (media.items || [])
+              .filter((it) => it.type === "image" && Array.isArray(it.srcset) && it.srcset.length)
+              .map((it) => {
+                const src = it.srcset[it.srcset.length - 1].src;
+                return src.startsWith("//") ? `https:${src}` : src;
+              })
+              .filter((src) => /\.(jpe?g|png)(\?|$)/i.test(src))
+              .slice(0, 6);
+          }
+        } catch (e) {
+          // niente galleria extra, va bene lo stesso
+        }
+
+        const result = { status: "ready", photo, gallery };
+        mediaCache.set(enName, result);
+        if (!cancelled) setState(result);
+      } catch (e) {
+        const result = { status: "error", photo: null, gallery: [] };
+        mediaCache.set(enName, result);
+        if (!cancelled) setState(result);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [enName]);
+
+  return state;
+}
+
+// ---------------------------------------------------------------------------
+// DATI IN TEMPO REALE: cambio valuta e meteo (API pubbliche, senza chiave)
+// ---------------------------------------------------------------------------
+
+let exchangeRatesPromise = null;
+
+function useExchangeRates() {
+  const [state, setState] = useState({ status: "loading", rates: null });
+  useEffect(() => {
+    if (!exchangeRatesPromise) {
+      exchangeRatesPromise = fetch("https://open.er-api.com/v6/latest/EUR")
+        .then((r) => r.json())
+        .then((d) => (d && d.result === "success" ? d.rates : null));
+    }
+    exchangeRatesPromise
+      .then((rates) => setState({ status: rates ? "ready" : "error", rates }))
+      .catch(() => setState({ status: "error", rates: null }));
+  }, []);
+  return state;
+}
+
+function extractCurrencyCode(currencyString) {
+  const m = currencyString.match(/\(([A-Z]{3})/);
+  return m ? m[1] : null;
+}
+
+const weatherCache = new Map();
+
+function useCapitalWeather(capital) {
+  const [state, setState] = useState(() => weatherCache.get(capital) || { status: "loading", temp: null, code: null });
+
+  useEffect(() => {
+    if (weatherCache.has(capital)) {
+      setState(weatherCache.get(capital));
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const geoRes = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(capital)}&count=1`
+        );
+        const geo = await geoRes.json();
+        const loc = geo?.results?.[0];
+        if (!loc) throw new Error("città non trovata");
+        const wRes = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current_weather=true`
+        );
+        const w = await wRes.json();
+        const cw = w?.current_weather;
+        if (!cw) throw new Error("meteo non disponibile");
+        const result = { status: "ready", temp: cw.temperature, code: cw.weathercode };
+        weatherCache.set(capital, result);
+        if (!cancelled) setState(result);
+      } catch (e) {
+        const result = { status: "error", temp: null, code: null };
+        weatherCache.set(capital, result);
+        if (!cancelled) setState(result);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [capital]);
+
+  return state;
+}
+
+function weatherLabel(code) {
+  const map = {
+    0: "Sereno", 1: "Poco nuvoloso", 2: "Parzialmente nuvoloso", 3: "Nuvoloso",
+    45: "Nebbia", 48: "Nebbia gelata",
+    51: "Pioviggine leggera", 53: "Pioviggine", 55: "Pioviggine intensa",
+    61: "Pioggia leggera", 63: "Pioggia", 65: "Pioggia intensa",
+    71: "Neve leggera", 73: "Neve", 75: "Neve intensa",
+    80: "Rovesci leggeri", 81: "Rovesci", 82: "Rovesci intensi",
+    95: "Temporale", 96: "Temporale con grandine", 99: "Temporale forte",
+  };
+  return map[code] || "Condizioni variabili";
+}
+
+const SCENES = {
+  city: { icon: Building2, label: "città", travelStyle: "City break e cultura" },
+  beach: { icon: Waves, label: "spiaggia", travelStyle: "Mare e relax" },
+  mountain: { icon: Mountain, label: "montagna", travelStyle: "Natura e trekking" },
+  island: { icon: Palmtree, label: "isola", travelStyle: "Isole e mare" },
+  desert: { icon: Sun, label: "deserto", travelStyle: "Deserto e avventura" },
+  jungle: { icon: Trees, label: "natura", travelStyle: "Natura e fauna selvatica" },
+};
+
+const SCENE_BY_COUNTRY = {
+  Italia: "city", Francia: "city", Spagna: "city", Portogallo: "city", Germania: "city",
+  "Regno Unito": "city", Grecia: "island", Croazia: "island", Islanda: "mountain",
+  Norvegia: "mountain", Svizzera: "mountain", "Paesi Bassi": "city", Irlanda: "mountain",
+  Austria: "mountain", "Repubblica Ceca": "city",
+  Giappone: "city", Thailandia: "beach", Vietnam: "beach", Indonesia: "island", India: "city",
+  Cina: "city", "Corea del Sud": "city", "Emirati Arabi Uniti": "desert", Nepal: "mountain",
+  "Sri Lanka": "jungle", Filippine: "island", Malesia: "jungle", Singapore: "city",
+  Georgia: "mountain", Turchia: "city",
+  Marocco: "desert", Egitto: "desert", Sudafrica: "mountain", Kenya: "jungle", Tanzania: "jungle",
+  Namibia: "desert", Senegal: "beach", Tunisia: "desert",
+  "Stati Uniti": "city", Canada: "mountain", Messico: "beach", Brasile: "jungle",
+  Argentina: "mountain", Perù: "mountain", Cile: "mountain", Colombia: "jungle",
+  "Costa Rica": "jungle", Cuba: "beach",
+  Australia: "beach", "Nuova Zelanda": "mountain", Figi: "island", "Polinesia Francese": "island",
+  Polonia: "city", Ungheria: "city", Belgio: "city", Danimarca: "city", Finlandia: "mountain", Malta: "island",
+  Israele: "city", Giordania: "desert", Cambogia: "jungle", Laos: "jungle", Qatar: "desert", Bhutan: "mountain",
+  Etiopia: "mountain", Ghana: "beach", Zambia: "jungle", Botswana: "jungle",
+  Ecuador: "mountain", Bolivia: "mountain", Panama: "jungle", Guatemala: "jungle",
+  "Repubblica Dominicana": "beach", Uruguay: "beach",
+  Vanuatu: "island", Samoa: "island",
+  Svezia: "mountain", Slovenia: "mountain", Slovacchia: "mountain", Romania: "mountain", Bulgaria: "beach",
+  Serbia: "city", "Bosnia ed Erzegovina": "mountain", Montenegro: "mountain", "Macedonia del Nord": "mountain",
+  Albania: "beach", Lussemburgo: "city", Lituania: "city", Lettonia: "city", Estonia: "city",
+  Cipro: "beach", Ucraina: "city", Moldavia: "mountain", Russia: "city", Bielorussia: "city",
+  Monaco: "city", "San Marino": "mountain",
+  "Corea del Nord": "city", Mongolia: "mountain", Kazakistan: "mountain", Uzbekistan: "desert",
+  Pakistan: "mountain", Bangladesh: "jungle", Myanmar: "jungle", Brunei: "jungle", "Timor Est": "jungle",
+  "Arabia Saudita": "desert", Kuwait: "desert", Bahrain: "city", Oman: "desert", Yemen: "desert",
+  Iraq: "desert", Iran: "desert", Siria: "desert", Libano: "city", Armenia: "mountain",
+  Azerbaigian: "city", Maldive: "island", Taiwan: "city", Afghanistan: "mountain",
+  Algeria: "desert", Libia: "desert", Sudan: "desert", "Sud Sudan": "jungle", Nigeria: "city",
+  "Costa d'Avorio": "jungle", Mali: "desert", Niger: "desert", "Burkina Faso": "desert", Camerun: "jungle",
+  "Repubblica Democratica del Congo": "jungle", Angola: "jungle", Mozambico: "beach", Zimbabwe: "jungle",
+  Uganda: "jungle", Ruanda: "jungle", Somalia: "desert", "Repubblica Centrafricana": "jungle",
+  Madagascar: "jungle", Mauritius: "island", Seychelles: "island", "Capo Verde": "beach", Eswatini: "jungle",
+  Venezuela: "jungle", Paraguay: "jungle", Honduras: "jungle", "El Salvador": "beach", Nicaragua: "jungle",
+  Belize: "beach", Giamaica: "beach", Bahamas: "beach", "Trinidad e Tobago": "beach", Barbados: "beach",
+  Haiti: "jungle", Suriname: "jungle", Guyana: "jungle",
+  "Papua Nuova Guinea": "jungle", Tonga: "island", Kiribati: "island", "Isole Salomone": "island",
+  Palau: "island", Micronesia: "island", "Nuova Caledonia": "island",
+  Kosovo: "mountain", Andorra: "mountain", Liechtenstein: "mountain", Vaticano: "city",
+  Kirghizistan: "mountain", Tagikistan: "mountain", Turkmenistan: "desert",
+  Ciad: "desert", Gibuti: "desert", Eritrea: "desert", Guinea: "jungle", "Guinea-Bissau": "jungle",
+  "Sierra Leone": "beach", Liberia: "jungle", Togo: "jungle", Benin: "jungle", Mauritania: "desert",
+  Gambia: "beach", "São Tomé e Príncipe": "jungle", "Guinea Equatoriale": "jungle", Lesotho: "mountain", Comore: "island",
+  "Antigua e Barbuda": "beach", Dominica: "jungle", Grenada: "beach", "Saint Kitts e Nevis": "beach",
+  "Saint Lucia": "beach", "Saint Vincent e Grenadine": "beach",
+  Nauru: "island", "Isole Marshall": "island", Tuvalu: "island",
+};
+
+// Stima indicativa del prezzo medio di un volo andata/ritorno in classe economica da Roma, in Euro.
+// Sono valori orientativi: variano molto in base a stagione, anticipo di prenotazione e compagnia.
+const FLIGHT_PRICE_BY_COUNTRY = {
+  Italia: 80, Francia: 90, Spagna: 80, Portogallo: 100, Germania: 90,
+  "Regno Unito": 110, Grecia: 100, Croazia: 90, Islanda: 250, Norvegia: 180,
+  Svizzera: 100, "Paesi Bassi": 90, Irlanda: 130, Austria: 90, "Repubblica Ceca": 90,
+  Giappone: 750, Thailandia: 650, Vietnam: 650, Indonesia: 750, India: 550,
+  Cina: 650, "Corea del Sud": 750, "Emirati Arabi Uniti": 450, Nepal: 700, "Sri Lanka": 700,
+  Filippine: 800, Malesia: 700, Singapore: 750, Georgia: 300, Turchia: 200,
+  Marocco: 150, Egitto: 300, Sudafrica: 700, Kenya: 600, Tanzania: 650,
+  Namibia: 800, Senegal: 450, Tunisia: 150,
+  "Stati Uniti": 550, Canada: 600, Messico: 700, Brasile: 750, Argentina: 900,
+  Perù: 800, Cile: 950, Colombia: 700, "Costa Rica": 800, Cuba: 750,
+  Australia: 1100, "Nuova Zelanda": 1300, Figi: 1400, "Polinesia Francese": 1500,
+  Polonia: 80, Ungheria: 80, Belgio: 90, Danimarca: 110, Finlandia: 160, Malta: 100,
+  Israele: 350, Giordania: 350, Cambogia: 700, Laos: 700, Qatar: 400, Bhutan: 900,
+  Etiopia: 500, Ghana: 550, Zambia: 700, Botswana: 800,
+  Ecuador: 850, Bolivia: 900, Panama: 850, Guatemala: 800,
+  "Repubblica Dominicana": 750, Uruguay: 900,
+  Vanuatu: 1500, Samoa: 1500,
+  Svezia: 130, Slovenia: 100, Slovacchia: 100, Romania: 90, Bulgaria: 100,
+  Serbia: 110, "Bosnia ed Erzegovina": 120, Montenegro: 120, "Macedonia del Nord": 130,
+  Albania: 100, Lussemburgo: 100, Lituania: 100, Lettonia: 100, Estonia: 120,
+  Cipro: 130, Ucraina: 0, Moldavia: 150, Russia: 0, Bielorussia: 0,
+  Monaco: 100, "San Marino": 90,
+  "Corea del Nord": 0, Mongolia: 750, Kazakistan: 500, Uzbekistan: 500,
+  Pakistan: 500, Bangladesh: 650, Myanmar: 0, Brunei: 750, "Timor Est": 900,
+  "Arabia Saudita": 450, Kuwait: 450, Bahrain: 450, Oman: 450, Yemen: 0,
+  Iraq: 0, Iran: 0, Siria: 0, Libano: 0, Armenia: 350,
+  Azerbaigian: 350, Maldive: 800, Taiwan: 750, Afghanistan: 0,
+  Algeria: 250, Libia: 0, Sudan: 0, "Sud Sudan": 0, Nigeria: 0,
+  "Costa d'Avorio": 550, Mali: 0, Niger: 0, "Burkina Faso": 0, Camerun: 600,
+  "Repubblica Democratica del Congo": 0, Angola: 700, Mozambico: 700, Zimbabwe: 750,
+  Uganda: 650, Ruanda: 650, Somalia: 0, "Repubblica Centrafricana": 0,
+  Madagascar: 750, Mauritius: 750, Seychelles: 900, "Capo Verde": 500, Eswatini: 750,
+  Venezuela: 0, Paraguay: 850, Honduras: 800, "El Salvador": 800, Nicaragua: 800,
+  Belize: 850, Giamaica: 800, Bahamas: 900, "Trinidad e Tobago": 850, Barbados: 900,
+  Haiti: 0, Suriname: 850, Guyana: 850,
+  "Papua Nuova Guinea": 1300, Tonga: 1500, Kiribati: 1600, "Isole Salomone": 1400,
+  Palau: 1300, Micronesia: 1400, "Nuova Caledonia": 1500,
+  Kosovo: 150, Andorra: 100, Liechtenstein: 100, Vaticano: 80,
+  Kirghizistan: 550, Tagikistan: 600, Turkmenistan: 600,
+  Ciad: 700, Gibuti: 500, Eritrea: 600, Guinea: 600, "Guinea-Bissau": 650,
+  "Sierra Leone": 650, Liberia: 650, Togo: 600, Benin: 600, Mauritania: 500,
+  Gambia: 500, "São Tomé e Príncipe": 700, "Guinea Equatoriale": 700, Lesotho: 750, Comore: 800,
+  "Antigua e Barbuda": 900, Dominica: 900, Grenada: 900, "Saint Kitts e Nevis": 900,
+  "Saint Lucia": 900, "Saint Vincent e Grenadine": 900,
+  Nauru: 1600, "Isole Marshall": 1600, Tuvalu: 1700,
+};
+
+// ---------------------------------------------------------------------------
+// SOTTOCOMPONENTI
+// ---------------------------------------------------------------------------
+
+function InfoRow({ icon: Icon, label, value, highlight }) {
+  return (
+    <div className={`flex items-start gap-3 py-3 border-b border-[#d8cdb2] last:border-b-0 ${highlight ? "bg-[#EDE6D6]/60 -mx-5 px-5 sm:-mx-6 sm:px-6" : ""}`}>
+      <div className="mt-0.5 w-7 h-7 rounded-full bg-[#EDE6D6] flex items-center justify-center shrink-0">
+        <Icon size={14} strokeWidth={1.75} className="text-[#3F7268]" />
+      </div>
+      <div className="flex-1 pt-0.5">
+        <div className="text-[10.5px] tracking-[0.12em] text-[#8a7f66] uppercase">{label}</div>
+        <div className="text-[14px] text-[#1B2A38] leading-snug mt-0.5">{value}</div>
+      </div>
+    </div>
+  );
+}
+
+function LiveRow({ icon: Icon, label, value, loading }) {
+  return (
+    <div className="flex items-start gap-3 py-3 border-b border-[#d8cdb2] last:border-b-0">
+      <div className="mt-0.5 w-7 h-7 rounded-full bg-[#EDE6D6] flex items-center justify-center shrink-0 relative">
+        <Icon size={14} strokeWidth={1.75} className="text-[#3F7268]" />
+        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#A6462F]" />
+      </div>
+      <div className="flex-1 pt-0.5">
+        <div className="text-[10.5px] tracking-[0.12em] text-[#8a7f66] uppercase flex items-center gap-1.5">
+          {label}
+          <span className="text-[8.5px] text-[#3F7268] border border-[#3F7268]/40 px-1 leading-[14px]">LIVE</span>
+        </div>
+        <div className="text-[14px] text-[#1B2A38] leading-snug mt-0.5">
+          {loading ? <span className="text-[#8a7f66]">Aggiornamento in corso…</span> : value}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StampCorner({ color }) {
+  return (
+    <div
+      className="absolute -top-px -right-px w-0 h-0"
+      style={{
+        borderStyle: "solid",
+        borderWidth: "0 22px 22px 0",
+        borderColor: `transparent ${color} transparent transparent`,
+      }}
+    />
+  );
+}
+
+const RISK_STYLES = {
+  sicuro: { label: "Sicuro", bg: "#3F7268", },
+  cautela: { label: "Cautela", bg: "#C9973E" },
+  conflitto: { label: "Conflitto / sconsigliato", bg: "#A6462F" },
+};
+
+function RiskBadge({ riskLevel, size = "sm" }) {
+  const style = RISK_STYLES[riskLevel] || RISK_STYLES.cautela;
+  const isSmall = size === "sm";
+  return (
+    <span
+      className={`inline-flex items-center gap-1 ${isSmall ? "text-[9.5px] px-1.5 py-0.5" : "text-[11px] px-2 py-1"} text-white leading-none`}
+      style={{ backgroundColor: style.bg }}
+    >
+      <ShieldCheck size={isSmall ? 9 : 11} />
+      {style.label}
+    </span>
+  );
+}
+
+function CountryCard({ country, onOpen }) {
+  const color = CONTINENT_COLORS[country.continent];
+  const sceneKey = SCENE_BY_COUNTRY[country.name] || "city";
+  const Scene = SCENES[sceneKey].icon;
+  const { photo } = useCountryMedia(country.enName);
+  return (
+    <button
+      onClick={() => onOpen(country)}
+      className="group relative text-left bg-[#F7F3E8] border border-[#d8cdb2] p-0 overflow-hidden transition-all duration-150 hover:-translate-y-[3px]"
+      style={{ boxShadow: "3px 3px 0 0 #d8cdb2" }}
+      onMouseEnter={(e) => (e.currentTarget.style.boxShadow = `3px 3px 0 0 ${color}`)}
+      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "3px 3px 0 0 #d8cdb2")}
+    >
+      <div className="relative h-[72px] flex items-center justify-center overflow-hidden" style={{ backgroundColor: color }}>
+        {photo ? (
+          <>
+            <img src={photo} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-[#1B2A38]/25" />
+          </>
+        ) : (
+          <>
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(135deg, rgba(255,255,255,0.10) 0px, rgba(255,255,255,0.10) 2px, transparent 2px, transparent 10px)",
+              }}
+            />
+            <Scene size={52} strokeWidth={1.1} className="absolute text-white/20" />
+          </>
+        )}
+        <span className="relative text-[36px] leading-none drop-shadow-sm">{country.flag}</span>
+        {country.riskLevel !== "sicuro" && (
+          <div className="absolute bottom-1.5 left-1.5">
+            <RiskBadge riskLevel={country.riskLevel} />
+          </div>
+        )}
+        <StampCorner color={color} />
+      </div>
+      <div className="p-4 pt-3">
+        <div className="font-serif text-[17px] text-[#1B2A38] leading-tight truncate">{country.name}</div>
+        <div className="text-[11.5px] text-[#8a7f66] mt-0.5 tracking-wide">{country.capital}</div>
+        <div className="mt-3 pt-2.5 border-t border-dashed border-[#d8cdb2] flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
+          <span className="text-[10.5px] tracking-[0.1em] uppercase text-[#8a7f66]">
+            {CONTINENTS.find((c) => c.id === country.continent)?.label}
+          </span>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function GalleryTile({ icon: Icon, label, caption, color }) {
+  return (
+    <div
+      className="relative h-28 flex flex-col items-center justify-center gap-1.5 overflow-hidden"
+      style={{
+        backgroundColor: color,
+        backgroundImage:
+          "repeating-linear-gradient(135deg, rgba(255,255,255,0.10) 0px, rgba(255,255,255,0.10) 2px, transparent 2px, transparent 10px)",
+      }}
+    >
+      <Icon size={30} strokeWidth={1.3} className="text-white/90" />
+      <span className="text-[11px] text-white/90 tracking-wide">{label}</span>
+      {caption && <span className="absolute bottom-1 right-2 text-[9px] text-white/50">{caption}</span>}
+    </div>
+  );
+}
+
+function CountryPage({ country, onBack, onOpenCountry, visited, onToggleVisited }) {
+  const color = CONTINENT_COLORS[country.continent];
+  const sceneKey = SCENE_BY_COUNTRY[country.name] || "city";
+  const scene = SCENES[sceneKey];
+  const Scene = scene.icon;
+  const isVisited = visited.has(country.name);
+  const { status: mediaStatus, photo, gallery } = useCountryMedia(country.enName);
+  const { rates } = useExchangeRates();
+  const currencyCode = extractCurrencyCode(country.currency);
+  const rate = rates && currencyCode && rates[currencyCode] ? rates[currencyCode] : null;
+  const weather = useCapitalWeather(country.capital);
+
+  const similar = useMemo(() => {
+    return COUNTRIES.filter(
+      (c) => c.name !== country.name && (SCENE_BY_COUNTRY[c.name] === sceneKey || c.continent === country.continent)
+    )
+      .sort((a, b) => (SCENE_BY_COUNTRY[a.name] === sceneKey ? 0 : 1) - (SCENE_BY_COUNTRY[b.name] === sceneKey ? 0 : 1))
+      .slice(0, 4);
+  }, [country, sceneKey]);
+
+  return (
+    <div>
+      <div className="max-w-5xl mx-auto px-5 pt-6">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-[13px] text-[#5c5644] hover:text-[#1B2A38]"
+        >
+          <ArrowLeft size={15} />
+          Torna alla guida
+        </button>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-5 mt-4">
+        <div className="relative overflow-hidden h-56 sm:h-64" style={{ backgroundColor: color }}>
+          {photo ? (
+            <img src={photo} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          ) : (
+            <>
+              <div
+                className="absolute inset-0"
+                style={{
+                  backgroundImage:
+                    "repeating-linear-gradient(135deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 2px, transparent 2px, transparent 12px)",
+                }}
+              />
+              <Scene size={160} strokeWidth={0.9} className="absolute -right-6 -top-8 text-white/15" />
+            </>
+          )}
+          <div
+            className="absolute inset-0"
+            style={{ background: `linear-gradient(180deg, ${color}00 40%, ${color}E6 100%)` }}
+          />
+          <div className="relative h-full flex items-end px-6 py-5">
+            <div className="flex items-center gap-4 w-full">
+              <span className="text-6xl leading-none drop-shadow-sm">{country.flag}</span>
+              <div className="flex-1">
+                <div className="font-serif text-[30px] text-[#F7F3E8] leading-tight drop-shadow-sm">{country.name}</div>
+                <div className="text-[12px] text-[#F7F3E8]/90 uppercase tracking-[0.12em] mt-1">
+                  Capitale — {country.capital} · {CONTINENTS.find((c) => c.id === country.continent)?.label}
+                </div>
+                <div className="mt-2">
+                  <RiskBadge riskLevel={country.riskLevel} size="lg" />
+                </div>
+              </div>
+              <button
+                onClick={() => onToggleVisited(country.name)}
+                className="flex items-center gap-1.5 px-3 py-2 text-[12.5px] border shrink-0"
+                style={{
+                  borderColor: "#F7F3E8",
+                  backgroundColor: isVisited ? "#F7F3E8" : "transparent",
+                  color: isVisited ? color : "#F7F3E8",
+                }}
+              >
+                {isVisited ? <CheckCircle2 size={14} /> : <Circle size={14} />}
+                {isVisited ? "Visitato" : "Segna come visitato"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-[#F7F3E8] border border-t-0 border-[#d8cdb2] px-6">
+          <LiveRow
+            icon={Coins}
+            label="Cambio 1 EUR"
+            value={rate ? `≈ ${rate.toFixed(rate < 10 ? 3 : 1)} ${currencyCode}` : "Non disponibile per questa valuta"}
+            loading={!rates}
+          />
+          <LiveRow
+            icon={Sun}
+            label={`Meteo ora a ${country.capital}`}
+            value={
+              weather.status === "ready"
+                ? `${Math.round(weather.temp)}°C, ${weatherLabel(weather.code)}`
+                : weather.status === "error"
+                ? "Dato non disponibile in questo momento"
+                : "Recupero in corso…"
+            }
+            loading={weather.status === "loading"}
+          />
+        </div>
+
+        <div className="bg-[#F7F3E8] border border-t-0 border-[#d8cdb2] px-6">
+          <InfoRow icon={Coins} label="Valuta" value={country.currency} />
+          <InfoRow icon={Languages} label="Lingua" value={country.language} />
+          <InfoRow icon={CalendarRange} label="Periodo migliore" value={country.bestTime} />
+          <InfoRow icon={Plane} label="Visto" value={country.visa} />
+          <InfoRow icon={ShieldCheck} label="Sicurezza" value={country.safety} />
+          <InfoRow icon={Plug} label="Presa elettrica" value={country.plug} />
+          <InfoRow icon={HandCoins} label="Mance" value={country.tipping} />
+          <InfoRow icon={Phone} label="Numero d'emergenza" value={country.emergency} />
+        </div>
+
+        <div className="bg-[#F7F3E8] border border-t-0 border-[#d8cdb2] px-6">
+          <InfoRow icon={UtensilsCrossed} label="Cosa mangiare" value={country.food} />
+          <InfoRow icon={Sparkles} label="Ideale per" value={scene.travelStyle} />
+          <InfoRow icon={Info} label="Altro" value={country.extra} highlight />
+        </div>
+
+        <div className="border border-t-0 border-[#d8cdb2] p-6 bg-[#F7F3E8]">
+          <div className="flex items-center gap-2 mb-3 text-[#8a7f66]">
+            <Landmark size={14} />
+            <span className="text-[11px] tracking-[0.1em] uppercase">Galleria</span>
+          </div>
+          {gallery.length > 0 ? (
+            <div className="grid grid-cols-3 gap-2">
+              {gallery.slice(0, 3).map((src, i) => (
+                <img
+                  key={i}
+                  src={src}
+                  alt=""
+                  loading="lazy"
+                  className="h-28 w-full object-cover bg-[#EDE6D6]"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              <GalleryTile icon={Landmark} label="Luoghi da vedere" color={color} />
+              <GalleryTile icon={UtensilsCrossed} label="Cucina locale" color={color} />
+              <GalleryTile icon={Scene} label={scene.label} color={color} />
+            </div>
+          )}
+          <p className="text-[11.5px] text-[#8a7f66] mt-3 leading-relaxed">
+            {gallery.length > 0 || photo
+              ? "Foto reali recuperate in tempo reale da Wikipedia. Possono variare in qualità o non essere sempre disponibili per ogni paese."
+              : mediaStatus === "loading"
+              ? "Sto recuperando le foto reali da Wikipedia..."
+              : "Nessuna foto reale trovata per questo paese in questo momento: restano le illustrazioni a tema."}
+          </p>
+        </div>
+
+        {REGIONS_BY_COUNTRY[country.name] && (
+          <div className="border border-t-0 border-[#d8cdb2] p-6 bg-[#F7F3E8]">
+            <div className="flex items-center gap-2 mb-3 text-[#8a7f66]">
+              <MapPinned size={14} />
+              <span className="text-[11px] tracking-[0.1em] uppercase">
+                Regioni — {REGIONS_BY_COUNTRY[country.name].length}
+              </span>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {REGIONS_BY_COUNTRY[country.name].map((r) => (
+                <div key={r.name} className="border border-[#d8cdb2] bg-[#EDE6D6] p-3">
+                  <div className="text-[13.5px] text-[#1B2A38] font-medium">{r.name}</div>
+                  <div className="text-[12px] text-[#5c5644] leading-snug mt-1">{r.description}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {similar.length > 0 && (
+        <div className="max-w-5xl mx-auto px-5 pb-12 pt-8">
+          <div className="flex items-center gap-3 mb-3.5">
+            <h2 className="font-serif text-[19px] text-[#1B2A38]">Paesi simili da esplorare</h2>
+            <div className="flex-1 border-t border-dashed border-[#d8cdb2]" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {similar.map((c) => (
+              <CountryCard key={c.name} country={c} onOpen={onOpenCountry} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FlightsPage() {
+  const sorted = useMemo(() => {
+    return [...COUNTRIES]
+      .map((c) => ({ ...c, price: FLIGHT_PRICE_BY_COUNTRY[c.name] || 0 }))
+      .sort((a, b) => {
+        if (a.price === 0 && b.price === 0) return a.name.localeCompare(b.name);
+        if (a.price === 0) return 1;
+        if (b.price === 0) return -1;
+        return a.price - b.price;
+      });
+  }, []);
+  const maxPrice = Math.max(...sorted.map((c) => c.price));
+
+  return (
+    <div>
+      <div className="mb-6 max-w-lg">
+        <div className="flex items-center gap-2 text-[#3F7268]">
+          <Ticket size={16} strokeWidth={1.75} />
+          <span className="text-[11px] tracking-[0.14em] uppercase">Budget di viaggio</span>
+        </div>
+        <h2 className="font-serif text-[26px] text-[#1B2A38] mt-1.5 leading-tight">
+          Prezzo medio del volo da Roma
+        </h2>
+        <p className="text-[13px] text-[#5c5644] mt-2.5 leading-relaxed">
+          Stima indicativa di un volo andata/ritorno in classe economica: sono valori orientativi che
+          <em> non</em> si aggiornano in tempo reale (servirebbe un accesso a pagamento a un motore di
+          ricerca voli). Il cambio valuta e il meteo, invece, li trovi live nella pagina di ogni paese.
+          Per i paesi in conflitto o senza voli commerciali regolari il prezzo non è disponibile.
+          Il prezzo reale del volo varia molto in base a stagione, anticipo di prenotazione e compagnia —
+          verifica sempre sui motori di ricerca voli prima di decidere.
+        </p>
+      </div>
+
+      <div className="space-y-1.5">
+        {sorted.map((c) => {
+          const color = CONTINENT_COLORS[c.continent];
+          const widthPct = c.price ? Math.max(6, Math.round((c.price / maxPrice) * 100)) : 0;
+          return (
+            <div
+              key={c.name}
+              className={`flex items-center gap-3 bg-[#F7F3E8] border border-[#d8cdb2] px-3 py-2.5 ${!c.price ? "opacity-60" : ""}`}
+            >
+              <span className="text-[20px] w-7 text-center shrink-0">{c.flag}</span>
+              <div className="w-32 sm:w-40 shrink-0 min-w-0">
+                <div className="text-[13.5px] text-[#1B2A38] leading-tight truncate">{c.name}</div>
+                <div className="text-[10px] text-[#8a7f66] uppercase tracking-wide">
+                  {CONTINENTS.find((x) => x.id === c.continent)?.label}
+                </div>
+              </div>
+              <div className="flex-1 h-2 bg-[#EDE6D6] relative overflow-hidden hidden sm:block">
+                <div className="h-full" style={{ width: `${widthPct}%`, backgroundColor: color }} />
+              </div>
+              <div className="w-28 text-right font-serif text-[13px] text-[#1B2A38] shrink-0">
+                {c.price ? `~${c.price}€` : "Non disponibile"}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function MapPage({ visited, onToggleVisited, onOpenCountry }) {
+  const visitedCount = visited.size;
+
+  const recommendations = useMemo(() => {
+    if (visitedCount === 0) return [];
+    const visitedCountries = COUNTRIES.filter((c) => visited.has(c.name));
+    const continents = new Set(visitedCountries.map((c) => c.continent));
+    const scenes = new Set(visitedCountries.map((c) => SCENE_BY_COUNTRY[c.name]));
+    return COUNTRIES.filter((c) => !visited.has(c.name))
+      .map((c) => {
+        let score = 0;
+        if (continents.has(c.continent)) score += 2;
+        if (scenes.has(SCENE_BY_COUNTRY[c.name])) score += 1;
+        return { ...c, score };
+      })
+      .filter((c) => c.score > 0)
+      .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
+      .slice(0, 6);
+  }, [visited, visitedCount]);
+
+  return (
+    <div className="max-w-5xl mx-auto px-5 py-8">
+      <div className="flex items-center gap-2 text-[#3F7268]">
+        <MapPinned size={16} strokeWidth={1.75} />
+        <span className="text-[11px] tracking-[0.14em] uppercase">La tua mappa</span>
+      </div>
+      <h2 className="font-serif text-[26px] text-[#1B2A38] mt-1.5 leading-tight">
+        Dove sei già stato, dove andare ancora.
+      </h2>
+      <p className="text-[13px] text-[#5c5644] mt-2.5 leading-relaxed max-w-lg">
+        Non è una cartografia esatta ma una mappa schematica, divisa per continente: tocca i paesi che hai
+        già visitato e in fondo troverai qualche idea su dove andare dopo, in base ai tuoi gusti.
+      </p>
+      <div className="mt-3 inline-flex items-center gap-2 border border-dashed border-[#8a7f66] px-3 py-1.5 text-[12px] text-[#8a7f66]">
+        <CheckCircle2 size={13} className="text-[#3F7268]" />
+        {visitedCount} paesi visitati su {COUNTRIES.length}
+      </div>
+
+      <div className="mt-7 space-y-6">
+        {CONTINENT_ORDER.map((id) => {
+          const label = CONTINENTS.find((c) => c.id === id).label;
+          const color = CONTINENT_COLORS[id];
+          const items = COUNTRIES.filter((c) => c.continent === id).sort((a, b) => a.name.localeCompare(b.name));
+          return (
+            <section key={id} className="border border-[#d8cdb2] bg-[#F7F3E8]">
+              <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#d8cdb2]" style={{ backgroundColor: `${color}1A` }}>
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+                <span className="font-serif text-[15px] text-[#1B2A38]">{label}</span>
+                <span className="text-[11px] text-[#8a7f66] ml-auto">
+                  {items.filter((c) => visited.has(c.name)).length}/{items.length} visitati
+                </span>
+              </div>
+              <div className="p-3 flex flex-wrap gap-1.5">
+                {items.map((c) => {
+                  const isVisited = visited.has(c.name);
+                  return (
+                    <button
+                      key={c.name}
+                      onClick={() => onToggleVisited(c.name)}
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 border text-[12px] transition-colors"
+                      style={{
+                        borderColor: isVisited ? color : "#d8cdb2",
+                        backgroundColor: isVisited ? color : "#EDE6D6",
+                        color: isVisited ? "#F7F3E8" : "#1B2A38",
+                      }}
+                      title={isVisited ? "Segnato come visitato" : "Segna come visitato"}
+                    >
+                      <span>{c.flag}</span>
+                      {c.name}
+                      {isVisited && <CheckCircle2 size={12} />}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+
+      <div className="mt-10">
+        <div className="flex items-center gap-3 mb-3.5">
+          <Sparkles size={16} className="text-[#3F7268]" />
+          <h3 className="font-serif text-[19px] text-[#1B2A38]">Consigliati per te</h3>
+          <div className="flex-1 border-t border-dashed border-[#d8cdb2]" />
+        </div>
+        {visitedCount === 0 ? (
+          <p className="text-[13px] text-[#8a7f66]">
+            Seleziona qualche paese già visitato qui sopra: in base a continenti e stile di viaggio ti
+            suggerirò altre destinazioni da guardare nella guida.
+          </p>
+        ) : recommendations.length === 0 ? (
+          <p className="text-[13px] text-[#8a7f66]">
+            Hai già visitato praticamente tutto quello che si assomiglia! Prova a esplorare un continente nuovo.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {recommendations.map((c) => (
+              <CountryCard key={c.name} country={c} onOpen={onOpenCountry} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// BLOG DI VIAGGIO
+// ---------------------------------------------------------------------------
+
+function BlogPage({ posts, onAddPost, onDeletePost, storageReady }) {
+  const [showForm, setShowForm] = useState(false);
+  const [title, setTitle] = useState("");
+  const [countryName, setCountryName] = useState("");
+  const [tripDate, setTripDate] = useState("");
+  const [content, setContent] = useState("");
+  const [rating, setRating] = useState(0);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+  const resetForm = () => {
+    setTitle("");
+    setCountryName("");
+    setTripDate("");
+    setContent("");
+    setRating(0);
+  };
+
+  const handleSubmit = () => {
+    if (!title.trim() || !content.trim()) return;
+    onAddPost({
+      id: `${Date.now()}`,
+      title: title.trim(),
+      countryName: countryName || null,
+      tripDate: tripDate.trim(),
+      content: content.trim(),
+      rating,
+      createdAt: new Date().toISOString(),
+    });
+    resetForm();
+    setShowForm(false);
+  };
+
+  const matchedCountry = (name) => COUNTRIES.find((c) => c.name === name);
+
+  return (
+    <div className="max-w-3xl mx-auto px-5 py-8">
+      <div className="flex items-center gap-2 text-[#3F7268]">
+        <NotebookPen size={16} strokeWidth={1.75} />
+        <span className="text-[11px] tracking-[0.14em] uppercase">Il tuo diario</span>
+      </div>
+      <div className="flex items-start justify-between gap-4 mt-1.5">
+        <div>
+          <h2 className="font-serif text-[26px] text-[#1B2A38] leading-tight">Blog di viaggio</h2>
+          <p className="text-[13px] text-[#5c5644] mt-2 leading-relaxed max-w-md">
+            Racconta i viaggi che hai già fatto, o annota qualsiasi cosa ti sembri interessante — consigli,
+            ricordi, cose da non dimenticare. Resta salvato qui anche se chiudi l'app.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowForm((v) => !v)}
+          className="flex items-center gap-1.5 px-3.5 py-2.5 text-[13px] text-white shrink-0"
+          style={{ backgroundColor: "#3F7268" }}
+        >
+          <PenLine size={14} />
+          {showForm ? "Chiudi" : "Nuovo racconto"}
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="mt-5 border border-[#d8cdb2] bg-[#F7F3E8] p-5">
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10.5px] tracking-[0.1em] text-[#8a7f66] uppercase">Titolo</label>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Es. Due settimane in Giappone"
+                className="w-full mt-1 px-3 py-2 bg-[#EDE6D6] border border-[#d8cdb2] text-[14px] focus:outline-none focus:border-[#3F7268]"
+              />
+            </div>
+            <div>
+              <label className="text-[10.5px] tracking-[0.1em] text-[#8a7f66] uppercase">Paese (opzionale)</label>
+              <select
+                value={countryName}
+                onChange={(e) => setCountryName(e.target.value)}
+                className="w-full mt-1 px-3 py-2 bg-[#EDE6D6] border border-[#d8cdb2] text-[14px] focus:outline-none focus:border-[#3F7268]"
+              >
+                <option value="">Nessuno / generico</option>
+                {[...COUNTRIES].sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
+                  <option key={c.name} value={c.name}>
+                    {c.flag} {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10.5px] tracking-[0.1em] text-[#8a7f66] uppercase">Quando (opzionale)</label>
+              <input
+                value={tripDate}
+                onChange={(e) => setTripDate(e.target.value)}
+                placeholder="Es. Marzo 2024"
+                className="w-full mt-1 px-3 py-2 bg-[#EDE6D6] border border-[#d8cdb2] text-[14px] focus:outline-none focus:border-[#3F7268]"
+              />
+            </div>
+            <div>
+              <label className="text-[10.5px] tracking-[0.1em] text-[#8a7f66] uppercase">Voto (opzionale)</label>
+              <div className="flex items-center gap-1 mt-1.5">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button key={n} onClick={() => setRating(n === rating ? 0 : n)} type="button">
+                    <Star
+                      size={20}
+                      className={n <= rating ? "text-[#C9973E] fill-[#C9973E]" : "text-[#d8cdb2]"}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="mt-3">
+            <label className="text-[10.5px] tracking-[0.1em] text-[#8a7f66] uppercase">Racconto</label>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Scrivi qui il tuo racconto, un consiglio, o qualsiasi contenuto interessante..."
+              rows={6}
+              className="w-full mt-1 px-3 py-2 bg-[#EDE6D6] border border-[#d8cdb2] text-[14px] leading-relaxed focus:outline-none focus:border-[#3F7268] resize-none"
+            />
+          </div>
+          <div className="flex items-center justify-between mt-3">
+            <span className="text-[11px] text-[#8a7f66]">
+              {storageReady ? "Salvato solo per te, in automatico" : "Caricamento..."}
+            </span>
+            <button
+              onClick={handleSubmit}
+              disabled={!title.trim() || !content.trim()}
+              className="px-4 py-2 text-[13px] text-white disabled:opacity-40"
+              style={{ backgroundColor: "#3F7268" }}
+            >
+              Pubblica nel diario
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-8 space-y-4">
+        {posts.length === 0 ? (
+          <div className="text-center py-14 text-[#8a7f66]">
+            <NotebookPen size={26} className="mx-auto mb-3 text-[#d8cdb2]" />
+            <p className="font-serif text-[17px] text-[#1B2A38] mb-1">Il diario è ancora vuoto</p>
+            <p className="text-[13px]">Racconta il primo viaggio, o annota qualcosa che ti interessa.</p>
+          </div>
+        ) : (
+          posts
+            .slice()
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .map((post) => {
+              const country = post.countryName ? matchedCountry(post.countryName) : null;
+              return (
+                <article key={post.id} className="border border-[#d8cdb2] bg-[#F7F3E8] p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        {country && <span className="text-xl">{country.flag}</span>}
+                        <h3 className="font-serif text-[19px] text-[#1B2A38] leading-tight">{post.title}</h3>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 text-[11.5px] text-[#8a7f66]">
+                        {post.countryName && <span>{post.countryName}</span>}
+                        {post.tripDate && <span>· {post.tripDate}</span>}
+                        {post.rating > 0 && (
+                          <span className="flex items-center gap-0.5">
+                            ·{" "}
+                            {Array.from({ length: post.rating }).map((_, i) => (
+                              <Star key={i} size={11} className="text-[#C9973E] fill-[#C9973E]" />
+                            ))}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {confirmDeleteId === post.id ? (
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          onClick={() => {
+                            onDeletePost(post.id);
+                            setConfirmDeleteId(null);
+                          }}
+                          className="text-[11px] px-2 py-1 text-white"
+                          style={{ backgroundColor: "#A6462F" }}
+                        >
+                          Confermi?
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="text-[11px] px-2 py-1 border border-[#d8cdb2] text-[#5c5644]"
+                        >
+                          Annulla
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteId(post.id)}
+                        className="text-[#8a7f66] hover:text-[#A6462F] shrink-0"
+                        title="Elimina"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[14px] text-[#1B2A38] leading-relaxed mt-3 whitespace-pre-wrap">
+                    {post.content}
+                  </p>
+                </article>
+              );
+            })
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// APP PRINCIPALE
+// ---------------------------------------------------------------------------
+
+function TravelInfoApp() {
+  const [page, setPage] = useState("guida");
+  const [query, setQuery] = useState("");
+  const [continent, setContinent] = useState("tutti");
+  const [selectedName, setSelectedName] = useState(null);
+  const [visited, setVisited] = useState(new Set());
+  const [storageReady, setStorageReady] = useState(false);
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [blogStorageReady, setBlogStorageReady] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const result = await storage.get("visited-countries");
+        if (result?.value) {
+          const names = JSON.parse(result.value);
+          setVisited(new Set(names));
+        }
+      } catch (e) {
+        // nessun dato salvato ancora, si parte da zero
+      } finally {
+        setStorageReady(true);
+      }
+    })();
+    (async () => {
+      try {
+        const result = await storage.get("blog-posts");
+        if (result?.value) {
+          setBlogPosts(JSON.parse(result.value));
+        }
+      } catch (e) {
+        // nessun post salvato ancora
+      } finally {
+        setBlogStorageReady(true);
+      }
+    })();
+  }, []);
+
+  const addBlogPost = (post) => {
+    setBlogPosts((prev) => {
+      const next = [...prev, post];
+      storage.set("blog-posts", JSON.stringify(next)).catch(() => {});
+      return next;
+    });
+  };
+
+  const deleteBlogPost = (id) => {
+    setBlogPosts((prev) => {
+      const next = prev.filter((p) => p.id !== id);
+      storage.set("blog-posts", JSON.stringify(next)).catch(() => {});
+      return next;
+    });
+  };
+
+  const toggleVisited = (name) => {
+    setVisited((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      if (storageReady) {
+        storage.set("visited-countries", JSON.stringify([...next])).catch(() => {});
+      }
+      return next;
+    });
+  };
+
+  const openCountry = (country) => {
+    setSelectedName(country.name);
+    setPage("paese");
+  };
+
+  const selectedCountry = COUNTRIES.find((c) => c.name === selectedName) || null;
+
+  const filtered = useMemo(() => {
+    return COUNTRIES.filter((c) => {
+      const matchesContinent = continent === "tutti" || c.continent === continent;
+      const matchesQuery = c.name.toLowerCase().includes(query.toLowerCase());
+      return matchesContinent && matchesQuery;
+    }).sort((a, b) => a.name.localeCompare(b.name));
+  }, [query, continent]);
+
+  const grouped = useMemo(() => {
+    if (continent !== "tutti" || query) return null;
+    return CONTINENT_ORDER.map((id) => ({
+      id,
+      label: CONTINENTS.find((c) => c.id === id).label,
+      items: COUNTRIES.filter((c) => c.continent === id).sort((a, b) => a.name.localeCompare(b.name)),
+    }));
+  }, [continent, query]);
+
+  const counts = useMemo(() => {
+    const map = { tutti: COUNTRIES.length };
+    CONTINENTS.slice(1).forEach((c) => {
+      map[c.id] = COUNTRIES.filter((co) => co.continent === c.id).length;
+    });
+    return map;
+  }, []);
+
+  return (
+    <div
+      className="min-h-screen text-[#1B2A38]"
+      style={{
+        fontFamily: "'Libre Franklin', sans-serif",
+        backgroundColor: "#EDE6D6",
+        backgroundImage:
+          "radial-gradient(circle, rgba(27,42,56,0.08) 1px, transparent 1px)",
+        backgroundSize: "18px 18px",
+      }}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Libre+Franklin:wght@400;500;600&display=swap');
+        .font-serif { font-family: 'Fraunces', serif; }
+      `}</style>
+
+      {/* Header */}
+      <header className="border-b border-[#d8cdb2] bg-[#F7F3E8] relative overflow-hidden">
+        <svg
+          className="absolute -right-10 -top-10 opacity-[0.06] pointer-events-none"
+          width="280" height="280" viewBox="0 0 100 100"
+        >
+          <circle cx="50" cy="50" r="46" fill="none" stroke="#1B2A38" strokeWidth="0.6" />
+          <circle cx="50" cy="50" r="30" fill="none" stroke="#1B2A38" strokeWidth="0.6" />
+          <line x1="50" y1="4" x2="50" y2="96" stroke="#1B2A38" strokeWidth="0.6" />
+          <line x1="4" y1="50" x2="96" y2="50" stroke="#1B2A38" strokeWidth="0.6" />
+          <path d="M50 12 L54 50 L50 88 L46 50 Z" fill="#1B2A38" />
+        </svg>
+
+        <div className="max-w-5xl mx-auto px-5 pt-9 pb-6 relative">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div className="max-w-lg">
+              <div className="flex items-center gap-2 text-[#3F7268]">
+                <Compass size={18} strokeWidth={1.75} />
+                <span className="text-[11.5px] tracking-[0.16em] uppercase">Guida di viaggio</span>
+              </div>
+              <h1 className="font-serif text-[32px] sm:text-[40px] leading-[1.08] mt-2">
+                Dove si va, cosa serve saperlo prima.
+              </h1>
+              <p className="text-[14px] text-[#5c5644] mt-3">
+                Valuta, lingua, visto, sicurezza, presa elettrica e un consiglio pratico per {COUNTRIES.length} paesi.
+              </p>
+            </div>
+
+            <div
+              className="shrink-0 self-start md:self-auto border border-dashed border-[#8a7f66] px-4 py-3 -rotate-1 bg-[#EDE6D6]"
+              style={{ minWidth: 190 }}
+            >
+              <div className="flex items-center gap-2 text-[#8a7f66]">
+                <Plane size={13} />
+                <span className="text-[10px] tracking-[0.14em] uppercase">Catalogo paesi</span>
+              </div>
+              <div className="flex items-baseline gap-1.5 mt-1">
+                <span className="font-serif text-[26px] text-[#1B2A38]">{COUNTRIES.length}</span>
+                <span className="text-[12px] text-[#8a7f66]">destinazioni</span>
+              </div>
+              <div className="mt-1 text-[11px] text-[#8a7f66]">{CONTINENT_ORDER.length} continenti coperti</div>
+            </div>
+          </div>
+
+          <div className="mt-6 relative max-w-sm">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a7f66]" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Cerca un paese..."
+              className="w-full pl-9 pr-3 py-2.5 bg-[#EDE6D6] border border-[#d8cdb2] text-[14px] placeholder:text-[#8a7f66] focus:outline-none focus:ring-2 focus:ring-[#3F7268]/40 focus:border-[#3F7268]"
+            />
+          </div>
+        </div>
+      </header>
+
+      {/* Navigazione tra pagine */}
+      <nav className="bg-[#F7F3E8] border-b border-[#d8cdb2]">
+        <div className="max-w-5xl mx-auto px-5 flex gap-6">
+          <button
+            onClick={() => setPage("guida")}
+            className="flex items-center gap-1.5 py-3.5 text-[13.5px] border-b-2 transition-colors"
+            style={{
+              borderColor: page === "guida" || page === "paese" ? "#3F7268" : "transparent",
+              color: page === "guida" || page === "paese" ? "#1B2A38" : "#8a7f66",
+            }}
+          >
+            <BookOpen size={14} strokeWidth={1.75} />
+            Guida ai paesi
+          </button>
+          <button
+            onClick={() => setPage("mappa")}
+            className="flex items-center gap-1.5 py-3.5 text-[13.5px] border-b-2 transition-colors"
+            style={{
+              borderColor: page === "mappa" ? "#3F7268" : "transparent",
+              color: page === "mappa" ? "#1B2A38" : "#8a7f66",
+            }}
+          >
+            <MapPinned size={14} strokeWidth={1.75} />
+            Mappa e paesi visitati
+          </button>
+          <button
+            onClick={() => setPage("voli")}
+            className="flex items-center gap-1.5 py-3.5 text-[13.5px] border-b-2 transition-colors"
+            style={{
+              borderColor: page === "voli" ? "#3F7268" : "transparent",
+              color: page === "voli" ? "#1B2A38" : "#8a7f66",
+            }}
+          >
+            <Ticket size={14} strokeWidth={1.75} />
+            Prezzo medio del volo
+          </button>
+          <button
+            onClick={() => setPage("blog")}
+            className="flex items-center gap-1.5 py-3.5 text-[13.5px] border-b-2 transition-colors"
+            style={{
+              borderColor: page === "blog" ? "#3F7268" : "transparent",
+              color: page === "blog" ? "#1B2A38" : "#8a7f66",
+            }}
+          >
+            <NotebookPen size={14} strokeWidth={1.75} />
+            Blog di viaggio
+          </button>
+        </div>
+      </nav>
+
+      {page === "guida" && (
+        <>
+          {/* Filtro continenti */}
+          <div className="max-w-5xl mx-auto px-5 pt-7">
+            <div className="flex items-center gap-2 mb-3 text-[#8a7f66]">
+              <MapPin size={13} />
+              <span className="text-[11px] tracking-[0.08em] uppercase">Filtra per area geografica</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {CONTINENTS.map((c) => {
+                const active = continent === c.id;
+                const color = CONTINENT_COLORS[c.id] || "#1B2A38";
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setContinent(c.id)}
+                    className="flex items-center gap-2 px-3.5 py-2 border text-[13px] transition-colors"
+                    style={{
+                      borderColor: active ? color : "#d8cdb2",
+                      backgroundColor: active ? color : "#F7F3E8",
+                      color: active ? "#F7F3E8" : "#1B2A38",
+                    }}
+                  >
+                    {c.id !== "tutti" && (
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: active ? "#F7F3E8" : color }} />
+                    )}
+                    {c.label}
+                    <span className={active ? "text-[#F7F3E8]/70" : "text-[#8a7f66]"}>· {counts[c.id]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Contenuto */}
+          <main className="max-w-5xl mx-auto px-5 py-8">
+            {filtered.length === 0 ? (
+              <div className="text-center py-16 text-[#8a7f66]">
+                <Globe2 size={28} className="mx-auto mb-3 text-[#d8cdb2]" />
+                <p className="font-serif text-[18px] text-[#1B2A38] mb-1">Nessun paese trovato</p>
+                <p className="text-[13px]">Prova a cambiare la ricerca o l'area geografica.</p>
+              </div>
+            ) : grouped ? (
+              <div className="space-y-9">
+                {grouped.map((group) => (
+                  <section key={group.id}>
+                    <div className="flex items-center gap-3 mb-3.5">
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CONTINENT_COLORS[group.id] }} />
+                      <h2 className="font-serif text-[19px] text-[#1B2A38]">{group.label}</h2>
+                      <div className="flex-1 border-t border-dashed border-[#d8cdb2]" />
+                      <span className="text-[12px] text-[#8a7f66]">{group.items.length} paesi</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {group.items.map((c) => (
+                        <CountryCard key={c.name} country={c} onOpen={openCountry} />
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {filtered.map((c) => (
+                  <CountryCard key={c.name} country={c} onOpen={openCountry} />
+                ))}
+              </div>
+            )}
+          </main>
+        </>
+      )}
+
+      {page === "paese" && selectedCountry && (
+        <CountryPage
+          country={selectedCountry}
+          onBack={() => setPage("guida")}
+          onOpenCountry={openCountry}
+          visited={visited}
+          onToggleVisited={toggleVisited}
+        />
+      )}
+
+      {page === "mappa" && (
+        <MapPage visited={visited} onToggleVisited={toggleVisited} onOpenCountry={openCountry} />
+      )}
+
+      {page === "voli" && (
+        <main className="max-w-5xl mx-auto px-5 py-8">
+          <FlightsPage />
+        </main>
+      )}
+
+      {page === "blog" && (
+        <BlogPage
+          posts={blogPosts}
+          onAddPost={addBlogPost}
+          onDeletePost={deleteBlogPost}
+          storageReady={blogStorageReady}
+        />
+      )}
+
+      <footer className="max-w-5xl mx-auto px-5 pb-10 pt-2 text-[12px] text-[#8a7f66] border-t border-dashed border-[#d8cdb2]">
+        Le informazioni su visti, sicurezza e norme locali cambiano nel tempo: verifica sempre le fonti ufficiali prima di partire.
+      </footer>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<TravelInfoApp />);
+</script>
+</body>
+</html>
